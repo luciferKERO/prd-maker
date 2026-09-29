@@ -42,4 +42,22 @@ assert(
   'Answered question must not be in next available questions'
 );
 
+// 4. Test creative domain discovery & multi-round replenishment
+const creativeEngine = new DiscoveryEngine();
+const creativeIdea = creativeEngine.processIdea('aku perlu web untuk bantu aku edit video secara cepat');
+assert.strictEqual(creativeIdea.project.domain, 'creative', 'Should detect creative domain for video editing prompt');
+assert.ok(creativeIdea.questions.length >= 3, 'Should generate initial questions for creative domain');
+
+let currentProject = creativeIdea.project;
+// Answer first question
+const cEngine = new DiscoveryEngine(currentProject);
+const firstCreativeQ = currentProject.questions.find((q) => q.status === 'pending');
+assert.ok(firstCreativeQ, 'Should have pending question');
+const resAnswer1 = cEngine.processAnswer(firstCreativeQ.id, 'Konten Kreator / Media Sosial');
+currentProject = resAnswer1.project;
+
+// Verify next round generation works when requested
+const nextRoundQuestions = new DiscoveryEngine(currentProject).generateNextRoundQuestions(3);
+assert.ok(nextRoundQuestions.length > 0, 'Should generate next round questions for uncovered domain pillars');
+
 console.log('All engine checks passed successfully!');

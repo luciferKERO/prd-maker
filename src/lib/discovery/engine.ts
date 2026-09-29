@@ -781,6 +781,272 @@ export class DiscoveryEngine {
         break;
       }
 
+      case "creative": {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Siapa target kreator dan audiens pengguna utama dari produk ini?",
+          description: "Menentukan tingkat kemudahan antarmuka, preset otomatis, dan kompleksitas alur kerja.",
+          category: "audience",
+          priority: "critical",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_creator_social", label: "Konten Kreator / Media Sosial (TikTok/Reels/YouTube)", description: "Fokus format vertikal/horizontal cepat, template otomatis, dan ekspor instan" },
+            { id: "opt_pro_editor", label: "Video Editor & Desainer Profesional", description: "Multi-track timeline presisi, shortcut fleksibel, dan kontrol parameter granular" },
+            { id: "opt_casual_user", label: "Pengguna Kasual & Pelajar / Mahasiswa", description: "Tampilan sederhana tanpa kurva belajar rumit, berbasis wizard" },
+            { id: "opt_biz_team", label: "Tim Pemasaran & Bisnis / Korporat", description: "Template branding konsisten, teks otomatis, dan aset kolaboratif" },
+          ],
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Target audiens menentukan kedalaman kontrol timeline dan gaya interaksi UI.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana alur kerja utama kreasi/penyuntingan (Core Workflow) yang diinginkan?",
+          description: "Jelaskan proses dari memasukkan media, proses edit, hingga menghasilkan karya final.",
+          category: "core_experience",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Alur kerja utama adalah inti dari spesifikasi user journey dan state engine.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Format media input/output dan kapabilitas penyuntingan apa yang wajib ada di MVP?",
+          description: "Sebutkan format berkas (MP4/WebM/Audio/Gambar) dan fitur penting seperti potong video, teks/subtitel, musik latar, efek transisi.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Daftar fitur MVP menentukan cakupan pemrosesan aset dan rendering engine.",
+        });
+        break;
+      }
+
+      case "educational": {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Siapa kelompok pembelajar dan instruktur target produk ini?",
+          description: "Memperjelas rentang usia, tingkat kemahiran, dan skenario pembelajaran mandiri vs terbimbing.",
+          category: "audience",
+          priority: "critical",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_edu_students", label: "Siswa Sekolah & Mahasiswa Universitas", description: "Fokus kurikulum terstruktur, latihan soal, dan persiapan ujian" },
+            { id: "opt_edu_prof", label: "Profesional / Karir (Up-skilling)", description: "Pembelajaran mandiri fleksibel dengan studi kasus praktis" },
+            { id: "opt_edu_general", label: "Pembelajar Umum / Hobi (Bahasa / Keterampilan)", description: "Gamifikasi menyenangkan dengan streak harian dan kuis kilat" },
+          ],
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Target audiens menentukan struktur materi dan tingkat gamifikasi pembelajaran.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana siklus belajar dan evaluasi (Learning Loop & Quizzes) yang dirancang?",
+          description: "Contoh: Menonton materi -> Kuis pemahaman -> Latihan interaktif -> Review berkala (spaced repetition).",
+          category: "core_experience",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Siklus belajar mendefinisikan modul progres belajar dan metrik penguasaan materi.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Fitur interaktif apa saja yang wajib tersedia dalam materi pembelajaran?",
+          description: "Sebutkan fitur seperti flashcard interaktif, timer studi Pomodoro, leaderboard, dan unduh materi offline.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Fitur interaktif mempengaruhi arsitektur state kuis dan sinkronisasi skor.",
+        });
+        break;
+      }
+
+      case "community": {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Komunitas apa yang menjadi fokus utama dan bagaimana hierarki anggotanya?",
+          description: "Menentukan sistem peran/moderasi, privasi grup, dan norma interaksi.",
+          category: "audience",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Struktur komunitas menentukan model perizinan (RBAC) dan moderasi konten.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana interaksi linimasa, thread diskusi, atau percakapan real-time berjalan?",
+          description: "Contoh: Forum diskusi berbasis upvote ala Reddit, chat channel ala Discord, atau feed linimasa.",
+          category: "core_experience",
+          priority: "critical",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_comm_feed", label: "Social Feed Linimasa dengan Like & Komentar", description: "Post multimedia dengan algoritma trending dan following" },
+            { id: "opt_comm_chat", label: "Real-Time Chat & Channel Komunitas", description: "Pesan instan cepat dengan dukungan voice/thread" },
+            { id: "opt_comm_forum", label: "Forum Diskusi Berstruktur Kategori & Solusi", description: "Thread topik mendalam dengan voting jawaban terbaik" },
+          ],
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Pola interaksi menentukan protokol jaringan (WebSocket vs REST) dan skema data.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Fitur sosial dan alat bantu moderasi apa yang dibutuhkan di versi 1.0?",
+          description: "Sebutkan fitur seperti lencana reputasi, auto-mod spam filter, direct message, dan notifikasi aktivitas.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Fitur moderasi esensial untuk menjaga kualitas komunitas sejak peluncuran awal.",
+        });
+        break;
+      }
+
+      case "automation": {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana alur pemicu (triggers) dan rangkaian aksi (actions / pipeline) dieksekusi?",
+          description: "Contoh: Webhook diterima -> Parse data -> Panggil AI / Transformasi -> Kirim notifikasi / Simpan DB.",
+          category: "core_experience",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Alur pemicu-aksi menentukan arsitektur queue worker dan state engine pipeline.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana strategi penjadwalan, concurrency, dan penanganan error / retry?",
+          description: "Menentukan batas toleransi kegagalan task, timeout eksekusi, dan sistem antrean background.",
+          category: "technical",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_auto_cron", label: "Jadwal Berkala (Cron / Polling Otomatis)", description: "Eksekusi otomatis pada interval waktu tertentu" },
+            { id: "opt_auto_event", label: "Event-Driven Real-Time (Webhook / PubSub)", description: "Eksekusi seketika saat event eksternal terdeteksi" },
+            { id: "opt_auto_manual", label: "Manual Trigger dengan Log Eksekusi Lengkap", description: "Dijalankan sesuai permintaan pengguna dengan riwayat detail" },
+          ],
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Strategi eksekusi menentukan runtime backend dan penanganan kegagalan otomatis.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Integrasi layanan pihak ketiga dan format data apa yang harus diproses?",
+          description: "Sebutkan API, webhook, atau sumber berkas eksternal yang terhubung.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Kebutuhan integrasi mendefinisikan adapter eksternal dan variabel rahasia (secrets).",
+        });
+        break;
+      }
+
+      case "desktop": {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Sistem operasi dan framework desktop apa yang ditargetkan?",
+          description: "Menentukan arsitektur native vs hybrid dan izin akses sistem berkas lokal.",
+          category: "technical",
+          priority: "critical",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_desk_tauri", label: "Tauri (Rust + Web Frontend)", description: "Ukuran biner ultra-kecil, konsumsi memori rendah, dan performa tinggi" },
+            { id: "opt_desk_electron", label: "Electron (Node.js + Chromium)", description: "Ekosistem kaya dengan kompatibilitas pustaka Node.js penuh" },
+            { id: "opt_desk_pwa", label: "PWA Desktop (Chrome / Edge Installable)", description: "Ringan tanpa perlu kompilasi native installer terpisah" },
+          ],
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Pilihan framework desktop menentukan proses bundling dan ukuran instalasi.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Bagaimana integrasi dengan sistem file lokal dan fungsionalitas offline?",
+          description: "Contoh: Buka berkas lokal langsung tanpa upload, auto-save ke disk, atau export multi-format.",
+          category: "core_experience",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Akses berkas lokal membedakan pengalaman desktop dari aplikasi web standar.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Fitur desktop native apa yang wajib tersedia di rilis awal?",
+          description: "Misal: System tray icon, global keyboard shortcuts, drag-and-drop berkas dari desktop, auto-updater.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Fitur OS native meningkatkan kenyamanan alur kerja pengguna desktop.",
+        });
+        break;
+      }
+
       default: {
         questions.push({
           id: this.generateQuestionId(),
@@ -1010,6 +1276,18 @@ export class DiscoveryEngine {
       newQuestions.push(fq);
     }
 
+    // 5b. Auto-replenish if pending questions are low (< 2) and completeness < 85%
+    const currentPending = this.project.questions.filter((q) => q.status === "pending");
+    if (currentPending.length < 2) {
+      const nextRound = this.generateNextRoundQuestions(Math.max(1, 3 - currentPending.length));
+      for (const nq of nextRound) {
+        if (!this.project.questions.some((q) => q.id === nq.id || q.title === nq.title)) {
+          this.project.questions.push(nq);
+          newQuestions.push(nq);
+        }
+      }
+    }
+
     // 6. Detect conflicts
     const conflicts = this.detectConflicts();
 
@@ -1026,6 +1304,308 @@ export class DiscoveryEngine {
       assumptions,
       conflicts,
     };
+  }
+
+  public generateNextRoundQuestions(count: number = 3): DiscoveryQuestion[] {
+    const comp = this.calculateCompleteness();
+    const existingQ = this.project.questions || [];
+    const pendingCategories = new Set(
+      existingQ.filter((q) => q.status === "pending").map((q) => q.category)
+    );
+    const answeredCategories = new Set(
+      existingQ.filter((q) => q.status === "answered").map((q) => q.category)
+    );
+    const existingTitles = new Set(existingQ.map((q) => q.title.toLowerCase().trim()));
+
+    const questions: DiscoveryQuestion[] = [];
+    const domain = (this.project.domain || "default") as ProjectDomain;
+
+    // 1. Check template categories with lowest fulfillment
+    const missingEntries = Object.entries(comp.categories)
+      .filter(([catKey, val]) => val.score < val.total && !pendingCategories.has(catKey))
+      .sort((a, b) => (a[1].score / a[1].total) - (b[1].score / b[1].total));
+
+    for (const [catKey] of missingEntries) {
+      if (questions.length >= count) break;
+      const q = this.createQuestionForCategory(catKey, domain);
+      if (q && !existingTitles.has(q.title.toLowerCase().trim())) {
+        questions.push(q);
+        pendingCategories.add(catKey);
+        existingTitles.add(q.title.toLowerCase().trim());
+      }
+    }
+
+    // 2. If more questions needed, generate deep dive refinement questions
+    if (questions.length < count) {
+      const deepDives = this.getDeepDiveQuestions(domain, answeredCategories, pendingCategories);
+      for (const dq of deepDives) {
+        if (questions.length >= count) break;
+        if (!existingTitles.has(dq.title.toLowerCase().trim())) {
+          questions.push(dq);
+          existingTitles.add(dq.title.toLowerCase().trim());
+        }
+      }
+    }
+
+    return questions;
+  }
+
+  private createQuestionForCategory(category: string, domain: ProjectDomain): DiscoveryQuestion | null {
+    switch (category) {
+      case "audience":
+        return {
+          id: this.generateQuestionId(),
+          title: "Siapa target audiens dan personas pengguna utama dari produk ini?",
+          description: "Memperjelas segmen pengguna, standar kemudahan penggunaan, dan skenario pemakaian harian.",
+          category: "audience",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_aud_creators", label: "Kreator Konten & Pengguna Media Kreatif", description: "Alur kerja cepat dengan antarmuka visual responsif" },
+            { id: "opt_aud_pro", label: "Pengguna Profesional & Tim Bisnis", description: "Fitur lanjutan, stabilitas tinggi, dan kepatuhan standar" },
+            { id: "opt_aud_students", label: "Pelajar / Mahasiswa & Edukasi", description: "Pengalaman belajar interaktif dan aksesibilitas ramah pemula" },
+            { id: "opt_aud_devs", label: "Developer & Pengguna Teknis", description: "Integrasi sistem, modularitas, dan performa efisien" },
+          ],
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Target audiens menjadi acuan dalam penentuan persona pengguna pada dokumen PRD.",
+        };
+
+      case "core_experience":
+        return {
+          id: this.generateQuestionId(),
+          title: "Bagaimana alur kerja utama pengguna dari awal hingga selesai (Core Workflow)?",
+          description: "Jelaskan langkah-langkah yang dilakukan pengguna untuk menyelesaikan tugas inti dalam aplikasi.",
+          category: "core_experience",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Core experience mendefinisikan bab User Journey dan alur navigasi utama pada PRD.",
+        };
+
+      case "features":
+        return {
+          id: this.generateQuestionId(),
+          title: "Sebutkan fitur pendukung lanjutan atau kapabilitas tambahan yang direncanakan:",
+          description: "Contoh: template siap pakai, sistem riwayat (undo/redo), pintasan keyboard, filter cerdas, atau kolaborasi multi-user.",
+          category: "features",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Rincian fitur membentuk daftar Functional Requirements dalam dokumen spesifikasi.",
+        };
+
+      case "deployment":
+        return {
+          id: this.generateQuestionId(),
+          title: "Lingkungan hosting, platform deployment, dan distribusi apa yang ditargetkan?",
+          description: "Menentukan pipeline CI/CD, konfigurasi build, dan infrastruktur rilis ke pengguna.",
+          category: "deployment",
+          priority: "medium",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_dep_vercel", label: "Vercel / Cloud Edge Serverless (Otomatis)", description: "Deployment instan global edge dengan integrasi Git otomatis" },
+            { id: "opt_dep_pwa", label: "PWA / Web-to-Mobile (Installable ke Android/Desktop)", description: "Aplikasi web lokal yang dapat diinstal langsung sebagai native app" },
+            { id: "opt_dep_docker", label: "Docker VPS / Self-Hosted Linux", description: "Kontrol infrastruktur privat dengan container mandiri" },
+            { id: "opt_dep_desktop", label: "Desktop Native Installer (Windows / macOS)", description: "Paket distribusi executable (.exe / .dmg) offline" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Target deployment menentukan bab Deployment & DevOps Requirements di PRD.",
+        };
+
+      case "testing":
+        return {
+          id: this.generateQuestionId(),
+          title: "Kriteria pengujian (QA) dan standar jaminan kualitas apa yang dibutuhkan?",
+          description: "Contoh: Unit test otomatis, end-to-end user flow testing, benchmark performa, atau uji coba manual.",
+          category: "testing",
+          priority: "low",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_full_ci_test", label: "Unit Test + E2E Terintegrasi CI/CD", description: "Keandalan tinggi sebelum setiap rilis kode ke produksi" },
+            { id: "opt_perf_bench", label: "Uji Performa & Stress Testing Beban", description: "Pengujian latensi rendering dan stabilitas memori aplikasi" },
+            { id: "opt_manual_qa", label: "Manual QA + Smoke Testing Cepat", description: "Validasi MVP cepat untuk iterasi pengembangan awal" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Menentukan kriteria lolos uji pada bab Quality Assurance & Acceptance Criteria.",
+        };
+
+      case "data":
+        return {
+          id: this.generateQuestionId(),
+          title: "Bagaimana arsitektur manajemen data dan penyimpanan aset yang akan digunakan?",
+          description: "Menentukan model persistensi lokal vs cloud dan pola sinkronisasi data.",
+          category: "data",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_data_local", label: "Local-First (IndexedDB / LocalStorage / OPFS)", description: "Data disimpan aman di perangkat pengguna dengan akses instan offline" },
+            { id: "opt_data_cloud_sql", label: "Cloud Database Relasional (PostgreSQL / Supabase)", description: "Skema terstruktur dengan integritas transaksi dan sinkronisasi multi-device" },
+            { id: "opt_data_hybrid", label: "Hybrid Local Cache dengan Sinkronisasi Cloud Opsional", description: "Respon instan offline dengan sinkronisasi background saat online" },
+          ],
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Arsitektur data menentukan skema model database dan kontrak API.",
+        };
+
+      case "auth":
+        return {
+          id: this.generateQuestionId(),
+          title: "Metode autentikasi dan kontrol akses pengguna apa yang dibutuhkan?",
+          description: "Menentukan batas keamanan, isolasi data, dan manajemen akun pengguna.",
+          category: "auth",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_auth_oauth", label: "Email/Password + OAuth (Google / GitHub)", description: "Standar autentikasi modern untuk web dan mobile" },
+            { id: "opt_auth_magic", label: "Passwordless Magic Links / WebAuthn", description: "Login instan tanpa password via email atau biometrik" },
+            { id: "opt_auth_none", label: "Publik / Tanpa Login (Penyimpanan Lokal Mandiri)", description: "Penggunaan privat instan tanpa perlu mendaftar akun" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Model autentikasi mendasari isolasi data dan keamanan pengguna.",
+        };
+
+      case "ui_ux":
+        return {
+          id: this.generateQuestionId(),
+          title: "Gaya antarmuka pengguna (UI/UX) dan tema visual apa yang diinginkan?",
+          description: "Contoh: Dark Mode Cyberpunk/HUD, Modern Minimalist Clean, atau Enterprise Studio Dashboard.",
+          category: "ui_ux",
+          priority: "medium",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_ui_dark_hud", label: "Dark Theme Futuristik / Sinematik HUD", description: "Palet gelap pekat dengan aksen neon cyan/emerald dan visual responsif" },
+            { id: "opt_ui_clean_minimal", label: "Clean Minimalist (Light & Dark Otomatis)", description: "Tipografi tajam, ruang lapang, dan navigasi ergonomis" },
+            { id: "opt_ui_dense_pro", label: "Density Tinggi / Pro Studio Multi-Panel", description: "Tata letak multi-kolom padat informasi dengan panel yang dapat dilipat" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Panduan UI/UX menjadi acuan desain komponen dan tata letak layar PRD.",
+        };
+
+      case "technical":
+        return {
+          id: this.generateQuestionId(),
+          title: "Teknologi stack utama dan batas performa teknis apa yang harus dipenuhi?",
+          description: "Contoh: Framework web modern, WebAssembly, komputasi canvas, atau batas latensi rendering.",
+          category: "technical",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_tech_next_wasm", label: "Next.js / React + WebAssembly (WASM) / WebGPU", description: "Komputasi media berat langsung di sisi klien browser dengan latensi nol" },
+            { id: "opt_tech_fullstack_ts", label: "TypeScript Fullstack (Next.js + Node / Serverless)", description: "Satu bahasa untuk frontend dan backend dengan tipe data aman end-to-end" },
+            { id: "opt_tech_native_hybrid", label: "Tauri / Electron / Capacitor Hybrid", description: "Kemampuan integrasi hardware native dengan basis kode web" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Menentukan bab Arsitektur Teknis dan dependensi sistem pada PRD.",
+        };
+
+      case "monetization":
+        return {
+          id: this.generateQuestionId(),
+          title: "Bagaimana strategi monetisasi atau distribusi nilai produk ini?",
+          description: "Menentukan fitur berbayar, batas kuota gratis, atau model distribusi lisensi.",
+          category: "monetization",
+          priority: "low",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_mon_free", label: "100% Gratis / Open Source / Portofolio", description: "Tanpa biaya berlangganan atau pembatasan fitur" },
+            { id: "opt_mon_freemium", label: "Freemium (Akses Gratis + Fitur Pro Berbayar)", description: "Fitur dasar gratis dengan opsi upgrade untuk ekspor kualitas tinggi" },
+            { id: "opt_mon_sub", label: "Langganan Berulang SaaS (Bulanan / Tahunan)", description: "Paket berjenjang untuk individu, profesional, dan tim" },
+          ],
+          required: false,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Menentukan bab Model Bisnis dan pembatasan tier fitur pada PRD.",
+        };
+
+      default:
+        return null;
+    }
+  }
+
+  private getDeepDiveQuestions(
+    domain: ProjectDomain,
+    answeredCategories: Set<string>,
+    pendingCategories: Set<string>
+  ): DiscoveryQuestion[] {
+    const list: DiscoveryQuestion[] = [];
+
+    if (!pendingCategories.has("security") && !answeredCategories.has("security")) {
+      list.push({
+        id: this.generateQuestionId(),
+        title: "Kebijakan keamanan data, privasi, dan kepatuhan apa yang wajib dipenuhi?",
+        description: "Menentukan enkripsi data saat diam/transit, sanitasi input, dan perlindungan privasi pengguna.",
+        category: "security",
+        priority: "medium",
+        questionType: "single_choice",
+        options: [
+          { id: "opt_sec_standard", label: "Standar HTTPS/TLS + Enkripsi Data Lokal", description: "Proteksi standar untuk aplikasi web modern dan penyimpanan lokal" },
+          { id: "opt_sec_zerotrust", label: "Zero-Knowledge / Client-Side Encryption", description: "Data hanya dapat didekripsi oleh pengguna dengan kunci privat" },
+          { id: "opt_sec_gdpr", label: "Kepatuhan Privasi Ketat (GDPR/Hak Hapus Data)", description: "Mendukung ekspor data mandiri dan penghapusan akun instan" },
+        ],
+        required: false,
+        blocking: false,
+        dependsOn: [],
+        relatedNodeIds: [],
+        status: "pending",
+        reason: "Menentukan spesifikasi Non-Functional Requirements pada aspek keamanan.",
+      });
+    }
+
+    if (!pendingCategories.has("integrations") && !answeredCategories.has("integrations")) {
+      list.push({
+        id: this.generateQuestionId(),
+        title: "Integrasi layanan pihak ketiga atau API eksternal apa yang dibutuhkan?",
+        description: "Contoh: Penyedia AI (OpenAI / Anthropic / Groq), CDN aset, notifikasi, atau payment gateway.",
+        category: "integrations",
+        priority: "low",
+        questionType: "text",
+        required: false,
+        blocking: false,
+        dependsOn: [],
+        relatedNodeIds: [],
+        status: "pending",
+        reason: "Mendokumentasikan Third-Party Dependencies & API Integrations pada PRD.",
+      });
+    }
+
+    return list;
   }
 
   private generateFollowUpQuestions(
@@ -1311,6 +1891,6 @@ export class DiscoveryEngine {
       (c) => c.status === "detected" || c.status === "acknowledged" || c.status === "resolving"
     );
 
-    return completeness > 75 && !pendingImportant && !unresolvedConflicts;
+    return (completeness >= 75 || this.project.status === "complete") && !pendingImportant && !unresolvedConflicts;
   }
 }

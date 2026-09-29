@@ -324,6 +324,8 @@ export function WorkspaceShell({ project: initialProject, onBack, onProjectChang
                   }}
                   aiStatus={aiStatus}
                   onAIStatusChange={setAiStatus}
+                  onGeneratePRD={() => setActiveView("prd")}
+                  onReviewQuestions={() => setActiveView("graph")}
                 />
               </div>
             </div>

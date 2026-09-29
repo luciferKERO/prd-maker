@@ -84,6 +84,54 @@ export function DiscoveryPanel({
   // Estimate round number (every 3-4 answered questions ~ 1 round)
   const currentRound = Math.max(1, Math.floor(answeredQuestions.length / 3) + 1);
 
+  // Missing domain categories for round transition summary
+  const missingCategories = useMemo(() => {
+    return Object.entries(completeness.categories)
+      .filter(([, v]) => v.score < v.total)
+      .map(([k, v]) => ({ key: k, label: v.label, score: v.score, total: v.total }));
+  }, [completeness.categories]);
+
+  // Generate Next Round of Discovery Questions
+  const handleGenerateNextRound = () => {
+    onAIStatusChange('thinking');
+    const eng = new DiscoveryEngine(project);
+    const newQuestions = eng.generateNextRoundQuestions(3);
+
+    if (newQuestions.length === 0) {
+      // If no more questions can be generated, mark as complete
+      const updatedProject: Project = {
+        ...project,
+        status: 'complete',
+      };
+      onProjectUpdate(updatedProject);
+      onAIStatusChange('complete');
+      return;
+    }
+
+    const updatedQuestions = [...(project.questions || []), ...newQuestions];
+    const firstNew = newQuestions[0];
+    const updatedProject: Project = {
+      ...project,
+      questions: updatedQuestions,
+      activeQuestionId: firstNew?.id,
+      status: 'discovery',
+    };
+
+    onProjectUpdate(updatedProject);
+    onAIStatusChange('asking');
+  };
+
+  // Finalize Discovery & Proceed to PRD
+  const handleFinalizeAndGeneratePRD = () => {
+    const updatedProject: Project = {
+      ...project,
+      status: 'complete',
+    };
+    onProjectUpdate(updatedProject);
+    onAIStatusChange('complete');
+    onGeneratePRD?.();
+  };
+
   // Initial Idea Submission
   const handleInitialIdeaSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -433,7 +481,7 @@ export function DiscoveryPanel({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
               <button
                 type="button"
-                onClick={onGeneratePRD}
+                onClick={handleFinalizeAndGeneratePRD}
                 className="p-3 rounded-md bg-jarvis-emerald text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-emerald/90 shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all"
               >
                 <FileText size={15} />
@@ -442,11 +490,11 @@ export function DiscoveryPanel({
 
               <button
                 type="button"
-                onClick={() => setIsRefining(true)}
+                onClick={handleGenerateNextRound}
                 className="p-3 rounded-md bg-black/40 border border-jarvis-cyan/50 text-jarvis-cyan font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-cyan/10 transition-all"
               >
                 <RotateCcw size={15} />
-                Lanjutkan Penyempurnaan
+                Lanjutkan Putaran Tambahan
               </button>
 
               <button
@@ -456,6 +504,81 @@ export function DiscoveryPanel({
               >
                 <ListFilter size={15} />
                 Tinjau Item Terbuka
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* State 4: Round Complete & Ready for Next Round */}
+        {!isInitialState && !activeQuestion && pendingQuestions.length === 0 && !isComplete && (
+          <div className="hud-panel p-6 rounded-lg border border-jarvis-cyan/40 bg-jarvis-cyan/5 space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-jarvis-cyan/20 border border-jarvis-cyan/50 flex items-center justify-center text-jarvis-cyan shrink-0 animate-pulse">
+                <Sparkles size={24} />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-mono font-bold text-jarvis-cyan uppercase tracking-wider">
+                    Putaran 0{currentRound} Selesai — Kesiapan {completeness.overall}%
+                  </h3>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-jarvis-cyan/20 text-jarvis-cyan border border-jarvis-cyan/40">
+                    {answeredQuestions.length} Terjawab
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                  Semua pertanyaan pada putaran ini telah terjawab. Anda dapat melanjutkan ke putaran berikutnya untuk melengkapi pilar domain yang belum lengkap, atau langsung menyelesaikan spesifikasi untuk membuat dokumen PRD.
+                </p>
+              </div>
+            </div>
+
+            {/* Missing Domain Pillars Status */}
+            {missingCategories.length > 0 && (
+              <div className="p-3.5 rounded bg-black/40 border border-jarvis-border/60 space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                  <span className="uppercase tracking-wider">Pilar Domain Membutuhkan Elisitasi:</span>
+                  <span className="text-jarvis-cyan">{missingCategories.length} Domain</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {missingCategories.map((cat) => (
+                    <span
+                      key={cat.key}
+                      className="px-2.5 py-1 rounded text-[11px] font-mono bg-sky-950/60 border border-sky-500/30 text-sky-300 flex items-center gap-1.5"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                      {cat.label}: {cat.score}/{cat.total}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Primary Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleGenerateNextRound}
+                className="p-3 rounded-md bg-jarvis-cyan text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-cyan/90 shadow-[0_0_15px_rgba(56,189,248,0.35)] transition-all"
+              >
+                <ArrowRight size={15} />
+                Lanjut Putaran 0{currentRound + 1}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFinalizeAndGeneratePRD}
+                className="p-3 rounded-md bg-jarvis-emerald text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-emerald/90 shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all"
+              >
+                <FileText size={15} />
+                Selesaikan & Buat PRD
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsRefining(true)}
+                className="p-3 rounded-md bg-black/40 border border-jarvis-border text-slate-300 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:border-slate-400 transition-all"
+              >
+                <Sparkles size={15} />
+                Tambah Entitas Manual
               </button>
             </div>
           </div>
