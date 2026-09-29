@@ -56,7 +56,7 @@ export function ProjectHealth({
   const statItems = [
     {
       key: 'questions',
-      label: 'Open Questions',
+      label: 'Pertanyaan',
       count: openQuestionsCount,
       icon: HelpCircle,
       color: openQuestionsCount > 0 ? 'text-jarvis-cyan' : 'text-slate-400',
@@ -65,7 +65,7 @@ export function ProjectHealth({
     },
     {
       key: 'conflicts',
-      label: 'Active Conflicts',
+      label: 'Konflik',
       count: activeConflictsCount,
       icon: AlertTriangle,
       color: activeConflictsCount > 0 ? 'text-jarvis-rose' : 'text-slate-400',
@@ -74,7 +74,7 @@ export function ProjectHealth({
     },
     {
       key: 'assumptions',
-      label: 'Assumptions',
+      label: 'Asumsi',
       count: assumptionsCount,
       icon: Lightbulb,
       color: assumptionsCount > 0 ? 'text-jarvis-amber' : 'text-slate-400',
@@ -83,7 +83,7 @@ export function ProjectHealth({
     },
     {
       key: 'decisions',
-      label: 'Decisions',
+      label: 'Keputusan',
       count: criticalDecisionsCount,
       icon: GitPullRequest,
       color: criticalDecisionsCount > 0 ? 'text-jarvis-violet' : 'text-slate-400',
@@ -97,21 +97,21 @@ export function ProjectHealth({
   return (
     <div
       className={cn(
-        'hud-panel p-4 rounded-lg border border-jarvis-border space-y-4',
+        'p-3.5 space-y-3.5',
         className
       )}
     >
       {/* Panel Header */}
       <div className="flex items-center justify-between pb-2 border-b border-jarvis-border/60">
         <div className="flex items-center gap-2">
-          <Activity size={16} className="text-jarvis-cyan" />
+          <Activity size={15} className="text-jarvis-cyan" />
           <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-100">
-            Specification Health Index
+            Kesiapan Spesifikasi
           </h3>
         </div>
         <span
           className={cn(
-            'text-[11px] font-mono font-bold px-2 py-0.5 rounded border',
+            'text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border',
             overall > 80
               ? 'bg-jarvis-emerald/10 border-jarvis-emerald/30 text-jarvis-emerald'
               : overall >= 50
@@ -119,36 +119,36 @@ export function ProjectHealth({
               : 'bg-jarvis-rose/10 border-jarvis-rose/30 text-jarvis-rose'
           )}
         >
-          {overall > 80 ? 'READY FOR PRD' : overall >= 50 ? 'ELICITING' : 'INCOMPLETE'}
+          {overall > 80 ? 'SIAP PRD' : overall >= 50 ? 'ELISITASI' : 'BELUM LENGKAP'}
         </span>
       </div>
 
       {/* Main Radial Progress & Overview */}
-      <div className="flex items-center gap-5 p-3 rounded-md bg-black/40 border border-jarvis-border/50">
+      <div className="flex items-center gap-3.5 p-2.5 rounded-md bg-black/40 border border-jarvis-border/50">
         <div className="shrink-0 relative">
           <ProgressRing
             value={overall}
-            size={88}
-            strokeWidth={6}
+            size={70}
+            strokeWidth={5}
           />
         </div>
 
-        <div className="flex-1 min-w-0 space-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
-            Overall Readiness
+        <div className="flex-1 min-w-0 space-y-0.5">
+          <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+            Kelengkapan
           </span>
-          <div className="flex items-baseline gap-2">
-            <span className={cn('text-2xl font-mono font-extrabold', getStatusColor(overall))}>
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn('text-xl font-mono font-extrabold', getStatusColor(overall))}>
               {overall}%
             </span>
-            <span className="text-xs text-slate-400 font-sans">completeness score</span>
+            <span className="text-[10px] text-slate-400 font-sans">skor</span>
           </div>
-          <p className="text-[11px] text-slate-300 font-sans leading-tight">
+          <p className="text-[10px] text-slate-300 font-sans leading-tight line-clamp-2">
             {overall > 80
-              ? 'Architecture and requirements fully structured.'
+              ? 'Arsitektur dan kebutuhan terstruktur lengkap.'
               : overall >= 50
-              ? 'Moderate coverage. Core architecture partially resolved.'
-              : 'Initial phase. Key architectural branches undefined.'}
+              ? 'Cakupan sedang. Arsitektur inti terpenuhi sebagian.'
+              : 'Fase awal. Kebutuhan utama belum terdefinisi.'}
           </p>
         </div>
       </div>

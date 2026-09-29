@@ -130,47 +130,48 @@ export function DiscoveryPanel({
       const provider = new LocalAIProvider();
       const response = await provider.analyzeAnswer(questionId, answer, project);
 
-      const nextEngine = new DiscoveryEngine(response.nodeUpdates ? { ...project, nodes: response.nodeUpdates as any } : project);
-      const nextQuestions = nextEngine.getNextQuestions(3);
-      const isDone = nextEngine.isDiscoveryComplete() || (nextQuestions.length === 0 && pendingQuestions.length <= 1);
+      // Build updated questions array: mark current answered and append any new follow-up questions
+      const updatedQuestions = (project.questions || []).map((q) => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            status: 'answered' as const,
+            answer,
+            answeredAt: Date.now(),
+          };
+        }
+        return q;
+      });
 
-      // Find next active question
-      const remainingPending = (response.questions || project.questions || []).filter(
-        (q) => q.id !== questionId && q.status === 'pending'
-      );
-      const nextActive = nextQuestions.find((q) => q.id !== questionId) || remainingPending[0];
+      if (response.questions && response.questions.length > 0) {
+        const existingIds = new Set(updatedQuestions.map((q) => q.id));
+        for (const newQ of response.questions) {
+          if (!existingIds.has(newQ.id)) {
+            updatedQuestions.push(newQ);
+          }
+        }
+      }
 
       const updatedProject: Project = {
         ...project,
-        questions: (project.questions || []).map((q) => {
-          if (q.id === questionId) {
-            return {
-              ...q,
-              status: 'answered',
-              answer,
-              answeredAt: Date.now(),
-            };
-          }
-          return q;
-        }),
+        questions: updatedQuestions,
         nodes: (response.nodeUpdates as any) || project.nodes,
         edges: response.edgeUpdates || project.edges,
         assumptions: response.assumptionUpdates || project.assumptions,
         conflicts: response.conflictUpdates || project.conflicts,
         completeness: response.analysis.completeness,
-        activeQuestionId: nextActive?.id,
-        status: isDone ? 'review' : 'discovery',
       };
 
-      // Append any newly generated questions if not already in list
-      if (response.questions && response.questions.length > 0) {
-        const existingIds = new Set(updatedProject.questions.map((q) => q.id));
-        for (const newQ of response.questions) {
-          if (!existingIds.has(newQ.id)) {
-            updatedProject.questions.push(newQ);
-          }
-        }
-      }
+      // Compute next questions using updated project state
+      const nextEngine = new DiscoveryEngine(updatedProject);
+      const nextQuestions = nextEngine.getNextQuestions(3);
+      const remainingPending = updatedQuestions.filter((q) => q.status === 'pending');
+      const isDone = nextEngine.isDiscoveryComplete() || remainingPending.length === 0;
+
+      // Find next active question
+      const nextActive = nextQuestions[0] || remainingPending[0] || null;
+      updatedProject.activeQuestionId = nextActive ? nextActive.id : undefined;
+      updatedProject.status = isDone ? 'review' : 'discovery';
 
       onProjectUpdate(updatedProject);
       onAIStatusChange(isDone ? 'complete' : 'asking');
@@ -182,15 +183,20 @@ export function DiscoveryPanel({
 
   // Handle Skip
   const handleSkipQuestion = (questionId: string) => {
-    const remaining = pendingQuestions.filter((q) => q.id !== questionId);
-    const nextQ = remaining[0];
+    const updatedQuestions = (project.questions || []).map((q) =>
+      q.id === questionId ? { ...q, status: 'skipped' as const, answeredAt: Date.now() } : q
+    );
+    const nextEngine = new DiscoveryEngine({ ...project, questions: updatedQuestions });
+    const nextQuestions = nextEngine.getNextQuestions(3);
+    const remainingPending = updatedQuestions.filter((q) => q.status === 'pending');
+    const isDone = nextEngine.isDiscoveryComplete() || remainingPending.length === 0;
+    const nextQ = nextQuestions[0] || remainingPending[0] || null;
 
     const updatedProject: Project = {
       ...project,
-      questions: (project.questions || []).map((q) =>
-        q.id === questionId ? { ...q, status: 'skipped', answeredAt: Date.now() } : q
-      ),
+      questions: updatedQuestions,
       activeQuestionId: nextQ?.id,
+      status: isDone ? 'review' : 'discovery',
     };
     onProjectUpdate(updatedProject);
   };
@@ -198,25 +204,30 @@ export function DiscoveryPanel({
   // Handle Defer / Decide Later
   const handleDeferQuestion = (questionId: string) => {
     const targetQ = (project.questions || []).find((q) => q.id === questionId);
-    const remaining = pendingQuestions.filter((q) => q.id !== questionId);
-    const nextQ = remaining[0];
+    const updatedQuestions = (project.questions || []).map((q) =>
+      q.id === questionId ? { ...q, status: 'deferred' as const, answeredAt: Date.now() } : q
+    );
+    const nextEngine = new DiscoveryEngine({ ...project, questions: updatedQuestions });
+    const nextQuestions = nextEngine.getNextQuestions(3);
+    const remainingPending = updatedQuestions.filter((q) => q.status === 'pending');
+    const isDone = nextEngine.isDiscoveryComplete() || remainingPending.length === 0;
+    const nextQ = nextQuestions[0] || remainingPending[0] || null;
 
     const updatedProject: Project = {
       ...project,
-      questions: (project.questions || []).map((q) =>
-        q.id === questionId ? { ...q, status: 'deferred', answeredAt: Date.now() } : q
-      ),
+      questions: updatedQuestions,
       activeQuestionId: nextQ?.id,
+      status: isDone ? 'review' : 'discovery',
     };
 
     // Also record as a deferred decision if not already present
     if (targetQ && !updatedProject.decisions.some((d) => d.id === `dec_deferred_${targetQ.id}`)) {
       updatedProject.decisions.push({
         id: `dec_deferred_${targetQ.id}`,
-        title: `Deferred: ${targetQ.title}`,
-        description: targetQ.description || targetQ.reason || 'Decision deferred by user during discovery.',
+        title: `Ditunda: ${targetQ.title}`,
+        description: targetQ.description || targetQ.reason || 'Keputusan ditunda selama sesi discovery.',
         status: 'proposed',
-        options: targetQ.options?.map((o) => o.label) || ['Yes', 'No'],
+        options: targetQ.options?.map((o) => o.label) || ['Ya', 'Tidak'],
         relatedNodeIds: targetQ.relatedNodeIds || [],
       });
     }
@@ -279,14 +290,14 @@ export function DiscoveryPanel({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-sm font-mono font-bold tracking-wider text-slate-100 uppercase">
-                Interactive Discovery Matrix
+                Matriks Discovery Interaktif
               </h2>
               <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase bg-jarvis-cyan/15 text-jarvis-cyan border border-jarvis-cyan/30">
                 {project.domain ? project.domain.replace('_', ' ') : 'System Init'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-sans">
-              Autonomous requirements elicitation & architecture refinement
+              Elisitasi kebutuhan otomatis & penyempurnaan arsitektur sistem
             </p>
           </div>
         </div>
@@ -295,10 +306,10 @@ export function DiscoveryPanel({
         <div className="flex items-center gap-6">
           <div className="text-right">
             <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block">
-              Phase / Round
+              Fase / Putaran
             </span>
             <span className="text-sm font-mono font-bold text-jarvis-cyan">
-              ROUND 0{currentRound}
+              PUTARAN 0{currentRound}
             </span>
           </div>
 
@@ -312,10 +323,10 @@ export function DiscoveryPanel({
             />
             <div className="text-left">
               <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 block">
-                Spec Health
+                Kesiapan Spesifikasi
               </span>
               <span className="text-xs font-mono font-semibold text-slate-200">
-                {answeredQuestions.length} answered / {project.questions?.length || 0} total
+                {answeredQuestions.length} terjawab / {project.questions?.length || 0} total
               </span>
             </div>
           </div>
@@ -332,10 +343,10 @@ export function DiscoveryPanel({
             </div>
             <div className="max-w-md space-y-1.5">
               <h3 className="text-base font-mono font-bold text-slate-100 uppercase tracking-wide">
-                Initialize System Architecture
+                Inisialisasi Arsitektur Sistem
               </h3>
               <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                Describe the application, game, or tool you wish to architect. JARVIS will synthesize initial requirement nodes and formulate adaptive discovery questions.
+                Jelaskan aplikasi, game, atau sistem yang ingin Anda bangun. JARVIS akan mengekstrak entitas kebutuhan awal dan menyusun pertanyaan discovery adaptif.
               </p>
             </div>
 
@@ -344,7 +355,7 @@ export function DiscoveryPanel({
                 rows={4}
                 value={initialIdea}
                 onChange={(e) => setInitialIdea(e.target.value)}
-                placeholder="Example: A real-time multiplayer card battler built with Godot 4 and Nakama backend, featuring deck building, ranked matchmaking, and cosmetics store..."
+                placeholder="Contoh: Game petarungan kartu multiplayer real-time berbasis Godot 4 dan Nakama backend, dilengkapi sistem deck building, ranked matchmaking, dan toko kosmetik..."
                 className="w-full p-3.5 rounded-lg bg-black/50 border border-jarvis-border focus:border-jarvis-cyan focus:ring-1 focus:ring-jarvis-cyan text-slate-100 placeholder:text-slate-500 text-xs font-sans outline-none leading-relaxed transition-all"
               />
 
@@ -361,11 +372,11 @@ export function DiscoveryPanel({
                 {isSubmittingIdea ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    Analyzing Architecture & Nodes...
+                    Menganalisis Arsitektur & Entitas...
                   </>
                 ) : (
                   <>
-                    Begin Discovery Process
+                    Mulai Proses Discovery
                     <ArrowRight size={14} />
                   </>
                 )}
@@ -380,10 +391,10 @@ export function DiscoveryPanel({
             <div className="flex items-center justify-between px-1 text-[11px] font-mono text-jarvis-cyan">
               <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-jarvis-cyan animate-ping" />
-                ACTIVE FOCUS QUESTION
+                PERTANYAAN FOKUS AKTIF
               </span>
               <span>
-                QUEUE: {pendingQuestions.length} REMAINING
+                ANTREAN: {pendingQuestions.length} TERSISA
               </span>
             </div>
 
@@ -406,14 +417,14 @@ export function DiscoveryPanel({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-mono font-bold text-jarvis-emerald uppercase tracking-wider">
-                    Specification Discovery Complete
+                    Discovery Spesifikasi Selesai
                   </h3>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-jarvis-emerald/20 text-jarvis-emerald border border-jarvis-emerald/40">
-                    {completeness.overall}% READY
+                    {completeness.overall}% SIAP
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                  All critical architectural questions, domain dependencies, and risk models have been resolved. The knowledge graph is sufficiently populated to generate the full Product Requirement Document (PRD).
+                  Semua pertanyaan arsitektur penting, dependensi domain, dan model risiko telah terkonfirmasi. Knowledge graph telah siap untuk menghasilkan Product Requirement Document (PRD) lengkap.
                 </p>
               </div>
             </div>
@@ -426,7 +437,7 @@ export function DiscoveryPanel({
                 className="p-3 rounded-md bg-jarvis-emerald text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-emerald/90 shadow-[0_0_15px_rgba(16,185,129,0.35)] transition-all"
               >
                 <FileText size={15} />
-                Generate PRD Document
+                Hasilkan Dokumen PRD
               </button>
 
               <button
@@ -435,7 +446,7 @@ export function DiscoveryPanel({
                 className="p-3 rounded-md bg-black/40 border border-jarvis-cyan/50 text-jarvis-cyan font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-jarvis-cyan/10 transition-all"
               >
                 <RotateCcw size={15} />
-                Continue Refining
+                Lanjutkan Penyempurnaan
               </button>
 
               <button
@@ -444,7 +455,7 @@ export function DiscoveryPanel({
                 className="p-3 rounded-md bg-black/40 border border-jarvis-border text-slate-300 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 hover:border-slate-400 transition-all"
               >
                 <ListFilter size={15} />
-                Review Open Items
+                Tinjau Item Terbuka
               </button>
             </div>
           </div>
@@ -456,15 +467,15 @@ export function DiscoveryPanel({
             <div className="flex items-center justify-between text-xs font-mono text-jarvis-cyan">
               <span className="flex items-center gap-1.5">
                 <Sparkles size={14} />
-                INJECT ARCHITECTURAL CONSTRAINTS OR SUB-SYSTEMS
+                TAMBAHKAN KENDALA ARSITEKTUR ATAU SUBSISTEM BARU
               </span>
               {isRefining && (
                 <button
                   type="button"
                   onClick={() => setIsRefining(false)}
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-white text-xs font-mono"
                 >
-                  Close
+                  Tutup
                 </button>
               )}
             </div>
@@ -473,7 +484,7 @@ export function DiscoveryPanel({
                 type="text"
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
-                placeholder="e.g. Add offline caching with IndexedDB and enterprise OAuth2 support..."
+                placeholder="Contoh: Tambahkan offline caching dengan IndexedDB dan integrasi OAuth2..."
                 className="flex-1 px-3 py-2 rounded bg-black/50 border border-jarvis-border focus:border-jarvis-cyan text-xs text-slate-100 outline-none"
               />
               <button
@@ -481,7 +492,7 @@ export function DiscoveryPanel({
                 disabled={!customPrompt.trim()}
                 className="px-4 py-2 rounded bg-jarvis-cyan/20 border border-jarvis-cyan text-jarvis-cyan font-mono text-xs uppercase hover:bg-jarvis-cyan hover:text-black transition-colors disabled:opacity-40"
               >
-                Elicit Nodes
+                Tambah Entitas
               </button>
             </div>
           </form>
@@ -494,7 +505,7 @@ export function DiscoveryPanel({
               <div className="flex items-center gap-2">
                 <Layers size={14} className="text-jarvis-cyan" />
                 <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-200">
-                  Decision & Elicitation Trail ({historyList.length})
+                  Riwayat Keputusan & Elisitasi ({historyList.length})
                 </h4>
               </div>
 
@@ -510,7 +521,7 @@ export function DiscoveryPanel({
                       : 'text-slate-400 hover:text-slate-200'
                   )}
                 >
-                  All ({answeredQuestions.length + deferredQuestions.length})
+                  Semua ({answeredQuestions.length + deferredQuestions.length})
                 </button>
                 <button
                   type="button"
@@ -522,7 +533,7 @@ export function DiscoveryPanel({
                       : 'text-slate-400 hover:text-slate-200'
                   )}
                 >
-                  Answered ({answeredQuestions.length})
+                  Terjawab ({answeredQuestions.length})
                 </button>
                 <button
                   type="button"
@@ -534,7 +545,7 @@ export function DiscoveryPanel({
                       : 'text-slate-400 hover:text-slate-200'
                   )}
                 >
-                  Deferred ({deferredQuestions.length})
+                  Ditunda ({deferredQuestions.length})
                 </button>
               </div>
             </div>
@@ -592,12 +603,12 @@ export function DiscoveryPanel({
                         )}
                         <div className="p-2 rounded bg-black/40 border border-jarvis-border/60">
                           <span className="text-[10px] font-mono uppercase tracking-wider text-jarvis-cyan block mb-1">
-                            Recorded Value:
+                            Nilai Tercatat:
                           </span>
                           <p className="font-mono text-xs text-slate-200 break-words">
                             {typeof item.answer === 'object'
                               ? JSON.stringify(item.answer, null, 2)
-                              : String(item.answer ?? '(Deferred / No answer)')}
+                              : String(item.answer ?? '(Ditunda / Belum dijawab)')}
                           </p>
                         </div>
                         {isDeferred && (
@@ -616,7 +627,7 @@ export function DiscoveryPanel({
                             }}
                             className="mt-1 px-2.5 py-1 rounded bg-jarvis-amber/20 border border-jarvis-amber text-jarvis-amber font-mono text-[10px] uppercase hover:bg-jarvis-amber/30"
                           >
-                            Re-open For Answer
+                            Buka Kembali Untuk Dijawab
                           </button>
                         )}
                       </div>

@@ -56,7 +56,7 @@ export class LocalAIProvider implements AIProvider {
     const known = result.project.nodes.map((n) => `${n.type}: ${n.title}`);
     const conflicts = result.conflicts.map((c) => c.description);
     const assumptions = result.assumptions.map((a) => a.statement);
-    const dependencies = result.newEdges.map((e) => `${e.source} -> ${e.target}`);
+    const dependencies = result.project.edges.map((e) => `${e.source} -> ${e.target}`);
 
     return {
       analysis: {
@@ -71,18 +71,18 @@ export class LocalAIProvider implements AIProvider {
         completeness: comp.overall,
         nextAction: {
           type: "continue",
-          label: engine.isDiscoveryComplete() ? "Finalize PRD" : "Continue Discovery",
+          label: engine.isDiscoveryComplete() ? "Finalisasi PRD" : "Lanjutkan Discovery",
           description: engine.isDiscoveryComplete()
-            ? "Specification complete. Ready to export PRD."
-            : "Continue answering follow-up questions.",
+            ? "Spesifikasi lengkap. Siap mengekspor PRD."
+            : "Lanjutkan menjawab pertanyaan lanjutan.",
         },
       },
       questions: result.newQuestions,
-      nodeUpdates: result.updatedNodes,
-      edgeUpdates: result.newEdges,
-      assumptionUpdates: result.assumptions,
-      conflictUpdates: result.conflicts,
-      summary: `Updated project with answer. Created ${result.updatedNodes.length} node(s), ${result.newEdges.length} edge(s), and ${result.newQuestions.length} follow-up question(s). Completeness: ${comp.overall}%.`,
+      nodeUpdates: result.project.nodes,
+      edgeUpdates: result.project.edges,
+      assumptionUpdates: result.project.assumptions,
+      conflictUpdates: result.project.conflicts,
+      summary: `Proyek diperbarui berdasarkan jawaban. Total ${result.project.nodes.length} entitas node, ${result.project.edges.length} relasi dependensi, dan ${result.newQuestions.length} pertanyaan lanjutan. Kesiapan: ${comp.overall}%.`,
     };
   }
 

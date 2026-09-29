@@ -61,3 +61,9 @@
 - Pushed to `https://github.com/luciferKERO/prd-maker` branch `main`
 - CodeGraph final sync: 35 files, 339 nodes, 823 edges — up to date
 - All 9 phases complete
+
+### Post-Launch Refinements: Bug Fixes & Localization [COMPLETE]
+- Fixed stuck question pending state in `DiscoveryPanel.tsx` & `LocalAIProvider`
+- Localized all discovery question templates, domain detection, and action buttons to Indonesian
+- Refined UI spacing and removed overlapping nested borders across panels
+- Added `tests/engine_check.mjs` verifying Indonesian elicitation & state transition flow

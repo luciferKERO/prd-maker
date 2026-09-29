@@ -314,16 +314,18 @@ export function WorkspaceShell({ project: initialProject, onBack, onProjectChang
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Discovery View */}
           {activeView === "discovery" && (
-            <div className="flex-1 overflow-y-auto">
-              <DiscoveryPanel
-                project={project}
-                onProjectUpdate={(updated) => {
-                  handleProjectUpdate(updated);
-                  addEvent("question_answered", "Discovery round updated");
-                }}
-                aiStatus={aiStatus}
-                onAIStatusChange={setAiStatus}
-              />
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
+              <div className="max-w-4xl mx-auto w-full">
+                <DiscoveryPanel
+                  project={project}
+                  onProjectUpdate={(updated) => {
+                    handleProjectUpdate(updated);
+                    addEvent("question_answered", "Discovery round updated");
+                  }}
+                  aiStatus={aiStatus}
+                  onAIStatusChange={setAiStatus}
+                />
+              </div>
             </div>
           )}
 

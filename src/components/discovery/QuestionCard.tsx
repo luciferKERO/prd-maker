@@ -32,31 +32,31 @@ const priorityBadgeStyles: Record<QuestionPriority, { bg: string; border: string
     bg: 'bg-jarvis-rose/10',
     border: 'border-jarvis-rose/40',
     text: 'text-jarvis-rose',
-    label: 'CRITICAL',
+    label: 'KRITIS',
   },
   high: {
     bg: 'bg-jarvis-amber/10',
     border: 'border-jarvis-amber/40',
     text: 'text-jarvis-amber',
-    label: 'HIGH PRIORITY',
+    label: 'PRIORITAS TINGGI',
   },
   medium: {
     bg: 'bg-jarvis-cyan/10',
     border: 'border-jarvis-cyan/40',
     text: 'text-jarvis-cyan',
-    label: 'MEDIUM',
+    label: 'MENENGAH',
   },
   low: {
     bg: 'bg-slate-500/10',
     border: 'border-slate-500/30',
     text: 'text-slate-400',
-    label: 'LOW',
+    label: 'RENDAH',
   },
   optional: {
     bg: 'bg-slate-500/10',
     border: 'border-slate-500/30',
     text: 'text-slate-400',
-    label: 'OPTIONAL',
+    label: 'OPSIONAL',
   },
 };
 
@@ -166,15 +166,15 @@ export function QuestionCard({
           </span>
 
           {question.blocking && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-jarvis-rose/20 text-jarvis-rose border border-jarvis-rose/40">
-              BLOCKING
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-jarvis-rose/20 text-jarvis-rose border border-jarvis-rose/40 font-bold">
+              WAJIB DIJAWAB
             </span>
           )}
         </div>
 
         <span className="text-[11px] font-mono text-jarvis-cyan/60 flex items-center gap-1">
           <Sparkles size={12} className="text-jarvis-cyan" />
-          TYPE: {question.questionType.toUpperCase()}
+          TIPE: {question.questionType.toUpperCase()}
         </span>
       </div>
 
@@ -195,7 +195,7 @@ export function QuestionCard({
         <div className="mb-5 flex items-start gap-2.5 p-2.5 rounded bg-jarvis-cyan/5 border border-jarvis-cyan/20 text-slate-300">
           <Info size={14} className="text-jarvis-cyan shrink-0 mt-0.5" />
           <div className="text-[11px] leading-relaxed">
-            <span className="font-mono uppercase font-bold text-jarvis-cyan mr-1">Context:</span>
+            <span className="font-mono uppercase font-bold text-jarvis-cyan mr-1">Konteks:</span>
             {question.reason}
           </div>
         </div>
@@ -236,7 +236,7 @@ export function QuestionCard({
                         <span>{opt.label}</span>
                       </div>
                       {opt.description && (
-                        <p className="mt-1 text-[11px] text-slate-400 font-sans ml-5.5">
+                        <p className="mt-1 text-[11px] text-slate-400 font-sans ml-5">
                           {opt.description}
                         </p>
                       )}
@@ -245,7 +245,7 @@ export function QuestionCard({
                 );
               })
             ) : (
-              <p className="text-xs text-slate-400 font-mono italic">No options provided.</p>
+              <p className="text-xs text-slate-400 font-mono italic">Tidak ada opsi yang tersedia.</p>
             )}
           </div>
         )}
@@ -284,7 +284,7 @@ export function QuestionCard({
                         <span>{opt.label}</span>
                       </div>
                       {opt.description && (
-                        <p className="mt-1 text-[11px] text-slate-400 font-sans ml-5.5">
+                        <p className="mt-1 text-[11px] text-slate-400 font-sans ml-5">
                           {opt.description}
                         </p>
                       )}
@@ -293,7 +293,7 @@ export function QuestionCard({
                 );
               })
             ) : (
-              <p className="text-xs text-slate-400 font-mono italic">No options provided.</p>
+              <p className="text-xs text-slate-400 font-mono italic">Tidak ada opsi yang tersedia.</p>
             )}
           </div>
         )}
@@ -305,7 +305,7 @@ export function QuestionCard({
               rows={3}
               value={typeof currentValue === 'string' ? currentValue : ''}
               onChange={(e) => setCurrentValue(e.target.value)}
-              placeholder="Type your answer or requirements here..."
+              placeholder="Tuliskan jawaban atau kebutuhan spesifik Anda di sini..."
               className="w-full px-3 py-2.5 rounded bg-black/40 border border-jarvis-border focus:border-jarvis-cyan focus:ring-1 focus:ring-jarvis-cyan text-slate-100 placeholder:text-slate-500 text-xs font-sans outline-none resize-y transition-colors"
             />
           </div>
@@ -338,7 +338,7 @@ export function QuestionCard({
               )}
             >
               <Check size={16} />
-              YES / AFFIRMATIVE
+              YA / SETUJU
             </button>
             <button
               type="button"
@@ -351,7 +351,7 @@ export function QuestionCard({
               )}
             >
               <X size={16} />
-              NO / NEGATIVE
+              TIDAK / BUKAN
             </button>
           </div>
         )}
@@ -397,7 +397,7 @@ export function QuestionCard({
                   )}
                 >
                   <CheckCircle2 size={14} className="text-jarvis-emerald" />
-                  Confirm
+                  Konfirmasi
                 </button>
                 <button
                   type="button"
@@ -405,7 +405,7 @@ export function QuestionCard({
                   className="py-2.5 px-3 rounded border border-jarvis-border hover:border-jarvis-amber/60 bg-black/30 text-slate-300 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all"
                 >
                   <Edit3 size={14} className="text-jarvis-amber" />
-                  Edit
+                  Ubah
                 </button>
                 <button
                   type="button"
@@ -421,7 +421,7 @@ export function QuestionCard({
                   )}
                 >
                   <X size={14} className="text-jarvis-rose" />
-                  Reject
+                  Tolak
                 </button>
               </div>
             ) : (
@@ -430,7 +430,7 @@ export function QuestionCard({
                   rows={2}
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
-                  placeholder="Specify correction or amendment..."
+                  placeholder="Tuliskan koreksi atau penyesuaian..."
                   className="w-full px-3 py-2 rounded bg-black/40 border border-jarvis-amber focus:border-jarvis-amber text-slate-100 text-xs font-sans outline-none"
                 />
                 <div className="flex justify-end gap-2">
@@ -439,7 +439,7 @@ export function QuestionCard({
                     onClick={() => setIsEditingConfirm(false)}
                     className="px-3 py-1 text-xs font-mono text-slate-400 hover:text-white"
                   >
-                    Cancel
+                    Batal
                   </button>
                   <button
                     type="button"
@@ -451,7 +451,7 @@ export function QuestionCard({
                     disabled={!customText.trim()}
                     className="px-3 py-1 rounded bg-jarvis-amber/20 border border-jarvis-amber text-jarvis-amber text-xs font-mono uppercase disabled:opacity-40"
                   >
-                    Submit Edit
+                    Kirim Perubahan
                   </button>
                 </div>
               </div>
@@ -466,7 +466,7 @@ export function QuestionCard({
               type="text"
               value={typeof currentValue === 'string' ? currentValue : ''}
               onChange={(e) => setCurrentValue(e.target.value)}
-              placeholder="Enter rank order (comma-separated)..."
+              placeholder="Masukkan urutan (pisahkan dengan koma)..."
               className="w-full px-3 py-2 rounded bg-black/40 border border-jarvis-border focus:border-jarvis-cyan text-slate-100 text-xs font-sans outline-none"
             />
           </div>
@@ -483,7 +483,7 @@ export function QuestionCard({
             className="px-2.5 py-1.5 rounded text-[11px] font-mono text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent hover:border-slate-700 transition-colors flex items-center gap-1"
           >
             <SkipForward size={12} />
-            Skip
+            Lewati
           </button>
 
           {/* Defer Button */}
@@ -493,7 +493,7 @@ export function QuestionCard({
             className="px-2.5 py-1.5 rounded text-[11px] font-mono text-slate-400 hover:text-jarvis-amber hover:bg-jarvis-amber/10 border border-transparent hover:border-jarvis-amber/30 transition-colors flex items-center gap-1"
           >
             <Clock size={12} />
-            Decide Later
+            Tunda Keputusan
           </button>
         </div>
 
@@ -510,7 +510,7 @@ export function QuestionCard({
                 : 'bg-jarvis-cyan text-black hover:bg-jarvis-cyan/90 shadow-[0_0_12px_rgba(56,189,248,0.4)] active:scale-95'
             )}
           >
-            Submit Answer
+            Kirim Jawaban
             <Send size={12} />
           </button>
         )}

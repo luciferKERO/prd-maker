@@ -31,35 +31,35 @@ const sectionConfig: Record<
   { label: string; icon: typeof AlertTriangle; borderColor: string; tagBg: string; tagText: string }
 > = {
   CRITICAL: {
-    label: 'CRITICAL QUESTIONS',
+    label: 'PERTANYAAN KRITIS',
     icon: ShieldAlert,
     borderColor: 'border-l-jarvis-rose',
     tagBg: 'bg-jarvis-rose/15',
     tagText: 'text-jarvis-rose',
   },
   NEEDS_CLARIFICATION: {
-    label: 'NEEDS CLARIFICATION',
+    label: 'PERLU KLARIFIKASI',
     icon: HelpCircle,
     borderColor: 'border-l-jarvis-amber',
     tagBg: 'bg-jarvis-amber/15',
     tagText: 'text-jarvis-amber',
   },
   CONFLICT: {
-    label: 'CONFLICTS',
+    label: 'KONFLIK ARSITEKTUR',
     icon: AlertTriangle,
     borderColor: 'border-l-jarvis-rose',
     tagBg: 'bg-jarvis-rose/15',
     tagText: 'text-jarvis-rose',
   },
   DEFERRED: {
-    label: 'DEFERRED DECISIONS',
+    label: 'KEPUTUSAN DITUNDA',
     icon: Clock,
     borderColor: 'border-l-jarvis-violet',
     tagBg: 'bg-jarvis-violet/15',
     tagText: 'text-jarvis-violet',
   },
   OPTIONAL: {
-    label: 'OPTIONAL ITEMS',
+    label: 'ITEM OPSIONAL',
     icon: MessageSquareWarning,
     borderColor: 'border-l-slate-500',
     tagBg: 'bg-slate-700/30',

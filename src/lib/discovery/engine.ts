@@ -21,8 +21,36 @@ import { calculateProjectCompleteness } from "./completeness";
 export class DiscoveryEngine {
   private project: Project;
 
-  constructor(project: Project) {
-    this.project = JSON.parse(JSON.stringify(project));
+  constructor(project?: Project) {
+    if (project) {
+      this.project = JSON.parse(JSON.stringify(project));
+    } else {
+      const now = Date.now();
+      this.project = {
+        id: `proj_${now}`,
+        title: "Untitled Project",
+        description: "",
+        domain: "default",
+        platforms: [],
+        status: "discovery",
+        completeness: 0,
+        nodes: [],
+        edges: [],
+        questions: [],
+        assumptions: [],
+        conflicts: [],
+        decisions: [],
+        risks: [],
+        requirements: [],
+        revisions: [],
+        metadata: {
+          domain: "default",
+          platforms: [],
+          createdAt: now,
+          updatedAt: now,
+        },
+      };
+    }
     if (!this.project.nodes) this.project.nodes = [];
     if (!this.project.edges) this.project.edges = [];
     if (!this.project.questions) this.project.questions = [];
@@ -49,9 +77,11 @@ export class DiscoveryEngine {
     if (
       text.includes("visual novel") ||
       text.includes("vn") ||
+      text.includes("novel visual") ||
       text.includes("renpy") ||
       text.includes("ren'py") ||
       text.includes("branching story") ||
+      text.includes("cerita bercabang") ||
       text.includes("dating sim") ||
       text.includes("kinetic novel")
     ) {
@@ -61,24 +91,32 @@ export class DiscoveryEngine {
     // Game check
     if (
       text.includes("game") ||
+      text.includes("permainan") ||
       text.includes("roblox") ||
       text.includes("unity") ||
       text.includes("godot") ||
       text.includes("unreal") ||
       text.includes("gameplay") ||
       text.includes("player") ||
+      text.includes("pemain") ||
       text.includes("level") ||
       text.includes("rpg") ||
       text.includes("fps") ||
       text.includes("mmo") ||
       text.includes("adventure") ||
+      text.includes("petualangan") ||
       text.includes("survival") ||
+      text.includes("bertahan hidup") ||
       text.includes("horror") ||
+      text.includes("horor") ||
       text.includes("puzzle") ||
+      text.includes("teka-teki") ||
       text.includes("platformer") ||
       text.includes("racing") ||
+      text.includes("balap") ||
       text.includes("fighting") ||
       text.includes("simulation") ||
+      text.includes("simulasi") ||
       text.includes("sandbox") ||
       text.includes("open world")
     ) {
@@ -88,6 +126,8 @@ export class DiscoveryEngine {
     // AI Tool check
     if (
       text.includes("ai tool") ||
+      text.includes("alat ai") ||
+      text.includes("kecerdasan buatan") ||
       text.includes("llm") ||
       text.includes("gpt") ||
       text.includes("copilot") ||
@@ -96,6 +136,7 @@ export class DiscoveryEngine {
       text.includes("prompt") ||
       text.includes("diffusion") ||
       text.includes("machine learning") ||
+      text.includes("pembelajaran mesin") ||
       text.includes("neural")
     ) {
       return "ai_tool";
@@ -105,8 +146,10 @@ export class DiscoveryEngine {
     if (
       text.includes("saas") ||
       text.includes("subscription") ||
+      text.includes("langganan") ||
       text.includes("b2b") ||
       text.includes("billing") ||
+      text.includes("tagihan") ||
       text.includes("multi-tenant") ||
       text.includes("multitenant") ||
       text.includes("workspace") ||
@@ -119,6 +162,10 @@ export class DiscoveryEngine {
     // Mobile check
     if (
       text.includes("mobile app") ||
+      text.includes("aplikasi mobile") ||
+      text.includes("aplikasi android") ||
+      text.includes("aplikasi ios") ||
+      text.includes("aplikasi hp") ||
       text.includes("ios app") ||
       text.includes("android app") ||
       text.includes("phone app") ||
@@ -150,12 +197,15 @@ export class DiscoveryEngine {
       text.includes("website") ||
       text.includes("web app") ||
       text.includes("webapp") ||
+      text.includes("aplikasi web") ||
+      text.includes("situs") ||
       text.includes("dashboard") ||
       text.includes("portal") ||
       text.includes("landing page") ||
       text.includes("blog") ||
       text.includes("ecommerce") ||
       text.includes("e-commerce") ||
+      text.includes("toko online") ||
       text.includes("admin") ||
       text.includes("cms")
     ) {
@@ -165,6 +215,7 @@ export class DiscoveryEngine {
     // Desktop check
     if (
       text.includes("desktop app") ||
+      text.includes("aplikasi desktop") ||
       text.includes("electron") ||
       text.includes("tauri") ||
       text.includes("windows app") ||
@@ -176,10 +227,14 @@ export class DiscoveryEngine {
     // Creative check
     if (
       text.includes("music") ||
+      text.includes("musik") ||
       text.includes("art generator") ||
       text.includes("video editor") ||
+      text.includes("edit video") ||
       text.includes("drawing") ||
+      text.includes("menggambar") ||
       text.includes("photo editing") ||
+      text.includes("edit foto") ||
       text.includes("3d model")
     ) {
       return "creative";
@@ -188,11 +243,18 @@ export class DiscoveryEngine {
     // Educational check
     if (
       text.includes("course") ||
+      text.includes("kursus") ||
       text.includes("quiz") ||
+      text.includes("kuis") ||
       text.includes("learn") ||
+      text.includes("belajar") ||
       text.includes("education") ||
+      text.includes("edukasi") ||
+      text.includes("pendidikan") ||
       text.includes("flashcard") ||
-      text.includes("student")
+      text.includes("student") ||
+      text.includes("mahasiswa") ||
+      text.includes("siswa")
     ) {
       return "educational";
     }
@@ -202,9 +264,12 @@ export class DiscoveryEngine {
       text.includes("forum") ||
       text.includes("discord") ||
       text.includes("chat app") ||
+      text.includes("aplikasi chat") ||
       text.includes("social network") ||
+      text.includes("media sosial") ||
       text.includes("feed") ||
-      text.includes("community")
+      text.includes("community") ||
+      text.includes("komunitas")
     ) {
       return "community";
     }
@@ -212,11 +277,13 @@ export class DiscoveryEngine {
     // Automation check
     if (
       text.includes("automation") ||
+      text.includes("otomasi") ||
       text.includes("bot") ||
       text.includes("scraper") ||
       text.includes("pipeline") ||
       text.includes("cron") ||
-      text.includes("workflow")
+      text.includes("workflow") ||
+      text.includes("alur kerja")
     ) {
       return "automation";
     }
@@ -358,68 +425,68 @@ export class DiscoveryEngine {
       case "game": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "What is the primary genre and core theme of your game?",
-          description: "Defines the core game loop, pacing, and audience expectations.",
+          title: "Apa genre utama dan tema inti dari game yang ingin Anda bangun?",
+          description: "Menentukan gameplay loop inti, tempo permainan, dan target audiens pemain.",
           category: "genre",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_rpg", label: "Action RPG / Adventure", description: "Quests, leveling, combat, story progression" },
-            { id: "opt_survival", label: "Survival / Sandbox", description: "Crafting, base-building, resource gathering" },
-            { id: "opt_horror", label: "Horror / Thriller", description: "Atmospheric tension, puzzles, evasion" },
-            { id: "opt_platformer", label: "2D/3D Platformer", description: "Precision movement, obstacles, stages" },
-            { id: "opt_puzzle", label: "Puzzle / Strategy", description: "Tactical decisions, problem solving, levels" },
-            { id: "opt_roblox_sim", label: "Roblox Tycoon / Simulator", description: "Fast loops, rebirths, pets, automation" },
+            { id: "opt_rpg", label: "Action RPG / Petualangan", description: "Quest, leveling, pertarungan, dan progres cerita" },
+            { id: "opt_survival", label: "Survival / Sandbox", description: "Crafting, bangun markas, dan pengumpulan sumber daya" },
+            { id: "opt_horror", label: "Horor / Thriller", description: "Ketegangan atmosfer, teka-teki, dan bertahan hidup" },
+            { id: "opt_platformer", label: "Platformer 2D / 3D", description: "Navigasi rintangan presisi dan stage progression" },
+            { id: "opt_puzzle", label: "Puzzle / Strategi", description: "Pemecahan masalah taktis dan level berbasis logika" },
+            { id: "opt_roblox_sim", label: "Roblox Tycoon / Simulator", description: "Loop cepat, rebirth, pet, dan sistem otomatisasi" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Genre dictates gameplay mechanics and progression architecture.",
+          reason: "Genre menentukan arsitektur mekanik gameplay dan sistem progresi.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "Which game engine and target platforms are you building for?",
-          description: "Determines technical constraints, physics engine, and asset pipelines.",
+          title: "Game engine dan platform target apa yang akan digunakan?",
+          description: "Menentukan batasan teknis, sistem fisika, dan pipeline aset 2D/3D.",
           category: "platform",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_roblox", label: "Roblox Studio (Luau)", description: "PC, Mobile, Console cross-play on Roblox" },
-            { id: "opt_unity", label: "Unity (C#)", description: "Cross-platform PC/Mobile/Console standalone" },
-            { id: "opt_godot", label: "Godot 4 (GDScript / C#)", description: "Lightweight 2D/3D open-source engine" },
-            { id: "opt_unreal", label: "Unreal Engine 5 (C++ / Blueprints)", description: "High-end 3D graphics & physics" },
-            { id: "opt_web", label: "Web / Three.js / HTML5", description: "Browser-based instant play" },
+            { id: "opt_roblox", label: "Roblox Studio (Luau)", description: "Cross-play PC, Mobile, dan Console di platform Roblox" },
+            { id: "opt_unity", label: "Unity (C#)", description: "Multiplatform mandiri untuk PC, Mobile, dan Konsol" },
+            { id: "opt_godot", label: "Godot 4 (GDScript / C#)", description: "Engine open-source ringan untuk 2D/3D" },
+            { id: "opt_unreal", label: "Unreal Engine 5 (C++ / Blueprints)", description: "Grafis 3D kelas atas dengan pencahayaan realistis" },
+            { id: "opt_web", label: "Web / Three.js / HTML5", description: "Dapat dimainkan instan langsung dari browser" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Platform and engine determine tech stack, network architecture, and performance targets.",
+          reason: "Pilihan platform dan engine menentukan arsitektur stack dan target performa.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What is the multiplayer scope?",
-          description: "Influences server architecture, replication, and state sync.",
+          title: "Bagaimana cakupan mode permainan dan multiplayer?",
+          description: "Mempengaruhi kebutuhan server backend, replikasi state, dan sinkronisasi jaringan.",
           category: "multiplayer",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_sp", label: "Singleplayer Only", description: "Offline or local client session" },
-            { id: "opt_coop", label: "Co-op (2 - 4 Players)", description: "Small squad peer-to-peer or lobby" },
-            { id: "opt_pvp", label: "Multiplayer PvP (10 - 50 Players)", description: "Dedicated servers, matchmaking, anti-cheat" },
-            { id: "opt_mmo", label: "MMO / Persistent World", description: "Sharded world servers, database persistence" },
+            { id: "opt_sp", label: "Singleplayer Saja (Offline / Lokal)", description: "Sesi pemain mandiri tanpa koneksi antar pemain" },
+            { id: "opt_coop", label: "Co-op / Tim Kecil (2 - 4 Pemain)", description: "Lobi kooperatif peer-to-peer atau dedicated kecil" },
+            { id: "opt_pvp", label: "Multiplayer PvP (10 - 50 Pemain)", description: "Dedicated matchmaking server dengan proteksi anti-cheat" },
+            { id: "opt_mmo", label: "MMO / Persistent World", description: "Dunia persisten berskala besar dengan database sharding" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Multiplayer design drives backend network architecture.",
+          reason: "Model multiplayer menjadi fondasi arsitektur jaringan backend game.",
         });
         break;
       }
@@ -428,50 +495,50 @@ export class DiscoveryEngine {
       case "saas": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "Who is the primary target audience and user persona?",
-          description: "Clarifies core workflows, usability standards, and user permissions.",
+          title: "Siapa target audiens dan pengguna utama dari aplikasi ini?",
+          description: "Memperjelas standar kemudahan penggunaan, hak akses, dan alur kerja utama.",
           category: "audience",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_b2b_smb", label: "B2B Teams & Small Businesses", description: "Multi-user collaboration, reporting, billing" },
-            { id: "opt_b2c_consumers", label: "B2C Everyday Consumers", description: "Frictionless onboarding, intuitive mobile-friendly UI" },
-            { id: "opt_devs", label: "Developers & Technical Users", description: "APIs, CLI tools, keyboard shortcuts, code export" },
-            { id: "opt_internal", label: "Internal Operations / Admin Staff", description: "Data management, audit logs, granular permissions" },
+            { id: "opt_b2b_smb", label: "Tim Bisnis / B2B & Usaha Kecil", description: "Kolaborasi multi-pengguna, laporan, dan billing" },
+            { id: "opt_b2c_consumers", label: "Pengguna Umum / Konsumen B2C", description: "Onboarding instan, UI intuitif, dan ramah mobile" },
+            { id: "opt_devs", label: "Developer & Pengguna Teknis", description: "Integrasi API, CLI, pintasan keyboard, dan ekspor data" },
+            { id: "opt_internal", label: "Operasional Internal & Staf Admin", description: "Manajemen data komprehensif, log audit, dan role ketat" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Target audience dictates UX complexity and security requirements.",
+          reason: "Target audiens menentukan kompleksitas UX dan model keamanan sistem.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What are the primary authentication and access control requirements?",
-          description: "Defines security boundaries and user management.",
+          title: "Metode autentikasi dan kontrol akses apa yang dibutuhkan?",
+          description: "Menentukan batas keamanan, isolasi data, dan manajemen akun pengguna.",
           category: "auth",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_oauth_pass", label: "Email/Password + OAuth (Google/GitHub)", description: "Standard modern SaaS auth" },
-            { id: "opt_magic_link", label: "Passwordless Magic Links / WebAuthn", description: "Fast, secure, frictionless login" },
-            { id: "opt_sso_rbac", label: "Enterprise SSO (SAML/Okta) + Granular RBAC", description: "Organization workspaces and custom roles" },
-            { id: "opt_public_noauth", label: "Public / No Authentication Required", description: "Anonymous usage or client-side storage" },
+            { id: "opt_oauth_pass", label: "Email/Password + OAuth (Google / GitHub)", description: "Standar autentikasi modern untuk web/SaaS" },
+            { id: "opt_magic_link", label: "Passwordless Magic Links / WebAuthn", description: "Login instan tanpa password via email atau biometrik" },
+            { id: "opt_sso_rbac", label: "Enterprise SSO (SAML/Okta) + Granular RBAC", description: "Workspace korporat dengan pembagian role khusus" },
+            { id: "opt_public_noauth", label: "Publik / Tanpa Login (Penyimpanan Lokal)", description: "Penggunaan anonim dengan data disimpan di browser (Local-First)" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Authentication model is a foundational dependency for data isolation.",
+          reason: "Model autentikasi adalah dependensi mendasar bagi isolasi data pengguna.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What are the top 3 core capabilities or user workflows?",
-          description: "Describe what a user accomplishes in a typical session.",
+          title: "Sebutkan 3 kapabilitas utama atau alur kerja terpenting yang dilakukan pengguna:",
+          description: "Jelaskan langkah apa saja yang diselesaikan pengguna dalam satu sesi normal.",
           category: "features",
           priority: "critical",
           questionType: "text",
@@ -480,7 +547,7 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Core features form the backbone of the Functional Requirements section.",
+          reason: "Fitur utama membentuk inti dari dokumen Spesifikasi Kebutuhan Fungsional.",
         });
         break;
       }
@@ -488,49 +555,49 @@ export class DiscoveryEngine {
       case "mobile_app": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "Which mobile platforms and framework do you intend to target?",
-          description: "Guides cross-platform vs native architecture decisions.",
+          title: "Framework dan platform mobile apa yang akan Anda targetkan?",
+          description: "Menentukan strategi cross-platform vs native dan pipeline build aplikasi.",
           category: "platform",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_rn", label: "Cross-Platform (React Native / Expo)", description: "Single codebase for iOS & Android" },
-            { id: "opt_flutter", label: "Cross-Platform (Flutter)", description: "High performance custom canvas rendering" },
-            { id: "opt_ios_native", label: "Native iOS (Swift / SwiftUI)", description: "Maximum Apple ecosystem integration" },
-            { id: "opt_pwa", label: "Progressive Web App (PWA)", description: "Web-first installable mobile app" },
+            { id: "opt_rn", label: "Cross-Platform (React Native / Expo)", description: "Satu basis kode TypeScript untuk Android & iOS" },
+            { id: "opt_flutter", label: "Cross-Platform (Flutter / Dart)", description: "Performa tinggi dengan rendering canvas kustom" },
+            { id: "opt_ios_native", label: "Native Mobile (Swift iOS / Kotlin Android)", description: "Integrasi penuh fitur hardware & OS native" },
+            { id: "opt_pwa", label: "Progressive Web App (PWA / Web-to-Mobile)", description: "Dapat diinstal langsung dari browser tanpa app store" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Platform selection defines UI libraries and build pipelines.",
+          reason: "Pemilihan framework menentukan pustaka UI dan proses rilis aplikasi.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What level of offline functionality is required?",
-          description: "Affects local SQLite/WatermelonDB storage and sync conflict strategies.",
+          title: "Tingkat dukungan fungsionalitas offline apa yang diperlukan?",
+          description: "Mempengaruhi penyimpanan SQLite/IndexedDB lokal dan strategi sinkronisasi data.",
           category: "offline",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_full_offline", label: "Full Offline-First with Background Sync", description: "All actions work offline; syncs when online" },
-            { id: "opt_cache_read", label: "Read-Only Cached Offline Data", description: "View cached items; create/edit requires connection" },
-            { id: "opt_online_only", label: "Online Only with Network Alerts", description: "Requires active internet connection to function" },
+            { id: "opt_full_offline", label: "Full Offline-First dengan Sinkronisasi Otomatis", description: "Semua aksi berjalan offline dan tersinkron saat internet tersedia" },
+            { id: "opt_cache_read", label: "Cache Read-Only saat Offline", description: "Bisa melihat data tersimpan; tambah/edit butuh internet" },
+            { id: "opt_online_only", label: "Online Saja dengan Indikator Jaringan", description: "Aplikasi membutuhkan koneksi internet aktif untuk beroperasi" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Offline architecture is hard to retrofit if not planned early.",
+          reason: "Arsitektur offline-first harus dirancang sejak awal agar tidak merombak skema data.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What are the core user screens and primary navigation style?",
-          description: "E.g. Bottom Tab Bar, Drawer, Feed with Modal Detail screens.",
+          title: "Jelaskan struktur layar utama aplikasi dan gaya navigasi yang diinginkan:",
+          description: "Contoh: Tab bar bawah (Bottom Nav), Drawer samping, atau Feed kartu dengan detail modal.",
           category: "ui_ux",
           priority: "high",
           questionType: "text",
@@ -539,7 +606,7 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Screen hierarchy shapes mobile user stories and navigation routes.",
+          reason: "Hierarki layar membentuk user journey dan rute navigasi aplikasi.",
         });
         break;
       }
@@ -547,48 +614,48 @@ export class DiscoveryEngine {
       case "visual_novel": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "What is the branching narrative structure and estimated routes?",
-          description: "Defines choice complexity, flag tracking, and multiple endings.",
+          title: "Bagaimana struktur narasi cerita dan perkiraan rute percabangan?",
+          description: "Menentukan kompleksitas pilihan pemain, flag tracking, dan jumlah ending.",
           category: "branching",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_kinetic", label: "Kinetic Novel (Linear, No Choices)", description: "Pure story reading experience, single canon ending" },
-            { id: "opt_standard_branches", label: "Branching Routes (3 - 5 Character Routes)", description: "Early choices branch into unique heroine/hero story arcs" },
-            { id: "opt_complex_mesh", label: "Complex Multi-Ending Mesh (10+ Endings)", description: "Variables, affinity meters, bad ends, and true ending unlock" },
+            { id: "opt_kinetic", label: "Kinetic Novel (Linier, Tanpa Pilihan)", description: "Fokus murni membaca cerita dengan satu alur cerita utama" },
+            { id: "opt_standard_branches", label: "Rute Bercabang Standar (3 - 5 Rute Karakter)", description: "Pilihan di awal membagi ke rute karakter dengan ending masing-masing" },
+            { id: "opt_complex_mesh", label: "Percabangan Kompleks & Multi-Ending (10+ Ending)", description: "Menggunakan meteran afinitas, variabel tersembunyi, dan true ending" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Branching complexity dictates script architecture and variable state management.",
+          reason: "Kompleksitas percabangan menentukan arsitektur script dan state variabel cerita.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "Which visual novel engine and platform are you targeting?",
-          description: "Affects scripting language and asset distribution.",
+          title: "Engine visual novel apa yang akan digunakan?",
+          description: "Mempengaruhi format penulisan script skenario dan pipeline aset gambar/suara.",
           category: "technical",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_renpy", label: "Ren'Py (Python)", description: "Industry standard for desktop and mobile VNs" },
-            { id: "opt_unity_vn", label: "Unity / Naninovel", description: "Rich 3D/2D animation and console porting" },
-            { id: "opt_web_vn", label: "Web / HTML5 (Monogatari / Custom)", description: "Browser instant play without installation" },
+            { id: "opt_renpy", label: "Ren'Py (Python)", description: "Standar industri untuk visual novel di PC dan Mobile" },
+            { id: "opt_unity_vn", label: "Unity / Naninovel", description: "Animasi 2D/3D kaya dan porting mudah ke konsol" },
+            { id: "opt_web_vn", label: "Web / HTML5 (Monogatari / Web Engine)", description: "Bisa dimainkan langsung di browser tanpa perlu instalasi" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Engine choice dictates script formatting and asset pipeline.",
+          reason: "Pilihan engine menentukan format dialog, transisi adegan, dan integrasi aset.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "Describe the protagonist and key main characters (2-4 characters):",
-          description: "Name, personality, motivation, and role in the conflict.",
+          title: "Deskripsikan karakter protagonis dan 2-4 tokoh utama lainnya:",
+          description: "Sebutkan nama, kepribadian, motivasi, dan perannya dalam konflik cerita.",
           category: "audience",
           priority: "high",
           questionType: "text",
@@ -597,7 +664,7 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Character profiles define dialogue requirements and sprite assets.",
+          reason: "Profil karakter menjadi acuan daftar dialog, ekspresi sprite, dan alur relasi.",
         });
         break;
       }
@@ -605,49 +672,49 @@ export class DiscoveryEngine {
       case "api": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "What API communication style and protocol will be used?",
-          description: "Defines schema definitions and client SDK patterns.",
+          title: "Gaya komunikasi dan protokol API apa yang akan diterapkan?",
+          description: "Menentukan definisi skema kontrak data dan pembuatan SDK klien.",
           category: "technical",
           priority: "critical",
           questionType: "single_choice",
           options: [
-            { id: "opt_rest_json", label: "RESTful JSON API with OpenAPI Spec", description: "Standard HTTP endpoints and status codes" },
-            { id: "opt_graphql", label: "GraphQL with Typed Schemas", description: "Flexible client-specified querying and subscriptions" },
-            { id: "opt_grpc", label: "gRPC / Protobuf", description: "High-performance low-latency microservice RPCs" },
-            { id: "opt_ws", label: "WebSocket / SSE Real-Time Stream", description: "Bidirectional persistent connection for event feeds" },
+            { id: "opt_rest_json", label: "RESTful JSON API dengan Spesifikasi OpenAPI", description: "Endpoint standar HTTP dengan status code konsisten" },
+            { id: "opt_graphql", label: "GraphQL dengan Typed Schema", description: "Klien dapat meminta payload presisi dan mendukung subscription" },
+            { id: "opt_grpc", label: "gRPC / Protobuf", description: "Komunikasi biner performa tinggi untuk microservices" },
+            { id: "opt_ws", label: "WebSocket / Server-Sent Events (SSE)", description: "Koneksi persisten real-time untuk stream data berkelanjutan" },
           ],
           required: true,
           blocking: true,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "API protocol dictates gateway, caching, and documentation structure.",
+          reason: "Protokol API menentukan konfigurasi gateway, caching, dan dokumentasi teknis.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What authentication and rate-limiting strategy is needed?",
-          description: "Protects API endpoints and meters developer usage.",
+          title: "Strategi autentikasi dan pembatasan kuota (rate limiting) apa yang diperlukan?",
+          description: "Melindungi endpoint API dari penyalahgunaan dan mengatur kuota pemakaian pengembang.",
           category: "auth",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_apikey", label: "API Keys with Tiered Rate Limiting", description: "Developers get secret keys with quota per minute" },
-            { id: "opt_jwt_oauth", label: "JWT Bearer Tokens / OAuth2", description: "User delegated authorization with short-lived tokens" },
-            { id: "opt_mtls", label: "mTLS / VPC Internal Only", description: "Zero-trust service-to-service internal security" },
+            { id: "opt_apikey", label: "API Key dengan Pembagian Kuota Berjenjang", description: "Developer menggunakan secret key dengan batas request per menit" },
+            { id: "opt_jwt_oauth", label: "JWT Bearer Token / OAuth2", description: "Otorisasi pengguna dengan token berbatas waktu kedaluwarsa" },
+            { id: "opt_mtls", label: "mTLS / VPC Internal Saja", description: "Keamanan antar-layanan privat zero-trust" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Auth mechanism is critical for API gateway configuration.",
+          reason: "Mekanisme autentikasi sangat krusial dalam perancangan middleware gateway.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "List the primary entities and operations (CRUD / actions):",
-          description: "E.g., Users, Projects, Documents, Invoices, Webhooks.",
+          title: "Sebutkan entitas data utama dan operasi CRUD / aksi yang tersedia:",
+          description: "Contoh: Pengguna, Proyek, Dokumen, Tagihan, Webhook.",
           category: "data",
           priority: "high",
           questionType: "text",
@@ -656,16 +723,16 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Entity breakdown forms the Data Model and Functional Endpoints specifications.",
+          reason: "Rincian entitas membentuk model data dan daftar endpoint fungsional PRD.",
         });
         break;
       }
 
-      default: {
+      case "ai_tool": {
         questions.push({
           id: this.generateQuestionId(),
-          title: "What is the primary problem this product solves, and for whom?",
-          description: "Clearly identify the core value proposition and primary user.",
+          title: "Apa kemampuan kecerdasan buatan (AI) utama dan nilai yang dihasilkan produk ini?",
+          description: "Menjelaskan model AI yang digunakan, workflow otomatisasi, dan output yang diterima pengguna.",
           category: "vision",
           priority: "critical",
           questionType: "text",
@@ -674,13 +741,66 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Core problem statement establishes project foundation.",
+          reason: "Nilai inti AI menjadi penentu arsitektur model dan prompt pipeline.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What are the must-have launch features (MVP scope)?",
-          description: "List 3-5 capabilities that define version 1.0.",
+          title: "Bagaimana arsitektur pemrosesan data dan pipeline AI yang akan digunakan?",
+          description: "Menentukan kebutuhan basis data vektor, RAG, atau fine-tuning model.",
+          category: "data",
+          priority: "high",
+          questionType: "single_choice",
+          options: [
+            { id: "opt_direct_llm", label: "Direct LLM API (OpenAI / Anthropic / Groq / Local)", description: "Pemanggilan langsung dengan prompt engineering terstruktur" },
+            { id: "opt_rag_vector", label: "RAG dengan Vektor Database (Chroma / Pinecone / pgvector)", description: "Pencarian semantik dokumen sebelum inferensi model" },
+            { id: "opt_local_embedded", label: "Model Lokal On-Device / Edge Inference", description: "Pemrosesan privat tanpa mengirim data ke server eksternal" },
+          ],
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Pipeline data menentukan latensi sistem dan kebutuhan biaya komputasi.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Sebutkan antarmuka pengguna (UI) dan cara interaksi dengan AI yang diinginkan:",
+          description: "Contoh: Chat assistant interaktif, kanvas visual dengan drag-and-drop, atau otomatisasi form cerdas.",
+          category: "ui_ux",
+          priority: "high",
+          questionType: "text",
+          required: true,
+          blocking: false,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Model interaksi menentukan tata letak komponen frontend dan status loading/streaming.",
+        });
+        break;
+      }
+
+      default: {
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Masalah utama apa yang ingin diselesaikan oleh produk ini, dan untuk siapa?",
+          description: "Identifikasi secara jelas proposisi nilai inti dan target pengguna produk.",
+          category: "vision",
+          priority: "critical",
+          questionType: "text",
+          required: true,
+          blocking: true,
+          dependsOn: [],
+          relatedNodeIds: [],
+          status: "pending",
+          reason: "Pernyataan masalah menjadi fondasi utama seluruh dokumen spesifikasi.",
+        });
+
+        questions.push({
+          id: this.generateQuestionId(),
+          title: "Apa saja fitur wajib yang harus ada pada versi rilis awal (MVP)?",
+          description: "Sebutkan 3-5 fitur penting yang mendefinisikan versi 1.0.",
           category: "features",
           priority: "critical",
           questionType: "text",
@@ -689,28 +809,28 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "MVP features define scope boundary and non-goals.",
+          reason: "Batasan fitur MVP menentukan cakupan produk dan prioritas pengerjaan.",
         });
 
         questions.push({
           id: this.generateQuestionId(),
-          title: "What are the key technical or platform constraints?",
-          description: "E.g. Web browser, Desktop app, specific languages, latency bounds.",
+          title: "Apa kendala teknis atau platform utama yang harus dipenuhi?",
+          description: "Contoh: Harus berjalan di browser web, offline-first, dukungan perangkat mobile, atau teknologi tertentu.",
           category: "technical",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_web_tech", label: "Modern Web Stack (Next.js / React / Node)", description: "Universal web access" },
-            { id: "opt_mobile_tech", label: "Mobile (iOS / Android)", description: "Handheld touch experience" },
-            { id: "opt_desktop_tech", label: "Desktop Native / Electron", description: "Local files and high CPU capability" },
-            { id: "opt_cli_tech", label: "CLI / Terminal Tool", description: "Scriptable developer utility" },
+            { id: "opt_web_tech", label: "Web Modern (Next.js / React / TypeScript)", description: "Aplikasi web responsif yang mudah diakses dari semua perangkat" },
+            { id: "opt_mobile_tech", label: "Aplikasi Mobile (Android / iOS)", description: "Aplikasi native atau PWA yang dapat diinstal di smartphone" },
+            { id: "opt_desktop_tech", label: "Aplikasi Desktop (Electron / Tauri)", description: "Aplikasi komputer dengan akses sistem file lokal" },
+            { id: "opt_cli_tech", label: "Alat Terminal / CLI Utility", description: "Perangkat lunak berbasis perintah baris untuk pengembang" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Technical constraints shape architecture specifications.",
+          reason: "Kendala teknologi menjadi panduan dalam perancangan arsitektur sistem.",
         });
         break;
       }
@@ -921,8 +1041,8 @@ export class DiscoveryEngine {
       if (answeredCategory === "genre" && !existingCategories.has("core_gameplay")) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What is the core minute-to-minute gameplay loop?",
-          description: "e.g., Explore dungeon -> Defeat monsters -> Collect loot -> Upgrade gear in hub -> Repeat.",
+          title: "Bagaimana alur gameplay inti menit-ke-menit (core loop) yang dialami pemain?",
+          description: "Contoh: Eksplorasi dungeon -> Kalahkan monster -> Kumpulkan loot -> Upgrade perlengkapan di kota -> Ulangi.",
           category: "core_gameplay",
           priority: "critical",
           questionType: "text",
@@ -931,96 +1051,96 @@ export class DiscoveryEngine {
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "The core loop is the central engine of player retention.",
+          reason: "Gameplay loop inti adalah penggerak utama retensi dan keterlibatan pemain.",
         });
       }
 
       if ((answeredCategory === "platform" || answeredCategory === "genre") && !existingCategories.has("monetization")) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What monetization model will you implement?",
-          description: "Defines in-game purchases, premium pricing, or ads.",
+          title: "Model monetisasi apa yang akan Anda terapkan?",
+          description: "Menentukan sistem pembelian dalam game (IAP), harga berbayar di awal, atau iklan.",
           category: "monetization",
           priority: "medium",
           questionType: "single_choice",
           options: [
-            { id: "opt_f2p_cosmetic", label: "Free-to-Play with Cosmetic Gamepasses", description: "Fair monetization, skins, pets, VIP tags" },
-            { id: "opt_premium_buy", label: "Premium Paid Upfront ($9 - $29)", description: "Full complete game with no in-game purchases" },
-            { id: "opt_f2p_battlepass", label: "Seasonal Battle Pass & Boosters", description: "Regular seasonal content updates and progression tracks" },
-            { id: "opt_free_no_ads", label: "100% Free / Open Source / Portfolio", description: "No monetization or commercial transactions" },
+            { id: "opt_f2p_cosmetic", label: "Free-to-Play dengan Gamepass Kosmetik", description: "Monetisasi adil: skin, efek visual, pet, tag VIP" },
+            { id: "opt_premium_buy", label: "Game Premium Berbayar di Awal ($5 - $30)", description: "Game lengkap tanpa pembelian item di dalam game" },
+            { id: "opt_f2p_battlepass", label: "Battle Pass Musiman & Booster", description: "Jalur progres berkala dengan konten musiman baru" },
+            { id: "opt_free_no_ads", label: "100% Gratis / Open Source / Portofolio", description: "Tanpa transaksi komersial atau iklan" },
           ],
           required: false,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Monetization model impacts inventory systems and storefront design.",
+          reason: "Model monetisasi mempengaruhi desain sistem inventaris dan UI toko.",
         });
       }
 
       if (!existingCategories.has("art_audio") && this.project.questions.filter((q) => q.status === "answered").length >= 2) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What visual art style and audio direction do you envision?",
-          description: "e.g., Low-poly stylized, pixel art, semi-realistic 3D, retro PSX.",
+          title: "Gaya visual grafis dan arah audio/musik seperti apa yang diinginkan?",
+          description: "Contoh: Low-poly stylized, pixel art retro, 3D semi-realistis, atau anime.",
           category: "art_audio",
           priority: "low",
           questionType: "single_choice",
           options: [
-            { id: "opt_stylized_lowpoly", label: "Stylized Low-Poly / Anime", description: "Vibrant colors, clean geometry, lightweight performance" },
-            { id: "opt_pixel_2d", label: "Retro 2D Pixel Art", description: "Classic 16-bit aesthetic, crisp sprite animations" },
-            { id: "opt_realistic_3d", label: "High-End PBR 3D", description: "Realistic lighting, detailed textures, particle VFX" },
+            { id: "opt_stylized_lowpoly", label: "Stylized Low-Poly / Anime", description: "Warna cerah, geometri bersih, dan performa sangat ringan" },
+            { id: "opt_pixel_2d", label: "Retro 2D Pixel Art", description: "Estetika klasik 16-bit dengan animasi sprite tajam" },
+            { id: "opt_realistic_3d", label: "3D High-End PBR / Realistis", description: "Pencahayaan detail, tekstur resolusi tinggi, efek partikel VFX" },
           ],
           required: false,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Visual requirements define technical asset budgets and memory targets.",
+          reason: "Kebutuhan visual menentukan alokasi memori dan target aset game.",
         });
       }
     } else if (domain === "web_app" || domain === "saas") {
       if (answeredCategory === "auth" && !existingCategories.has("data")) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What database and data storage architecture fits best?",
-          description: "Defines relational schema complexity and query patterns.",
+          title: "Arsitektur database dan penyimpanan data apa yang paling cocok?",
+          description: "Menentukan kompleksitas skema relasional dan pola query backend.",
           category: "data",
           priority: "high",
           questionType: "single_choice",
           options: [
-            { id: "opt_pg_sql", label: "Relational Database (PostgreSQL / Supabase)", description: "Strict relations, ACID transactions, relational integrity" },
-            { id: "opt_nosql_doc", label: "Document Database (MongoDB / Firestore)", description: "Flexible schemas, fast prototyping, JSON documents" },
-            { id: "opt_edge_kv", label: "Edge KV / Client-Side Offline DB", description: "Ultra-fast response with local IndexedDB sync" },
+            { id: "opt_pg_sql", label: "Database Relasional (PostgreSQL / Supabase / Prisma)", description: "Relasi ketat, transaksi ACID, dan integritas data tinggi" },
+            { id: "opt_nosql_doc", label: "Document Database (MongoDB / Firestore)", description: "Skema fleksibel, prototipe cepat, dokumen JSON" },
+            { id: "opt_edge_kv", label: "Edge KV / Client-Side Offline DB (IndexedDB / Local-First)", description: "Respon instan ultra-cepat dengan sinkronisasi browser" },
           ],
           required: true,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Data architecture determines backend models and API contracts.",
+          reason: "Arsitektur data menentukan skema model database dan kontrak API.",
         });
       }
 
       if (answeredCategory === "features" && !existingCategories.has("deployment")) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What is your target hosting and CI/CD deployment environment?",
-          description: "E.g., Vercel, AWS, Cloudflare, Docker.",
+          title: "Lingkungan hosting dan deployment CI/CD apa yang ditargetkan?",
+          description: "Contoh: Vercel, AWS, Google Cloud, Docker VPS.",
           category: "deployment",
           priority: "medium",
           questionType: "single_choice",
           options: [
-            { id: "opt_vercel", label: "Vercel / Next.js Serverless", description: "Instant global edge deployment with zero config" },
-            { id: "opt_aws_docker", label: "AWS / Google Cloud (Containers / Docker)", description: "Full infrastructure control and dedicated compute" },
-            { id: "opt_self_host", label: "Self-Hosted Linux VPS", description: "Cost-effective single server deployment" },
+            { id: "opt_vercel", label: "Vercel / Next.js Serverless (Otomatis)", description: "Deployment instan global edge tanpa konfigurasi server rumit" },
+            { id: "opt_aws_docker", label: "AWS / Cloud Container (Docker / Kubernetes)", description: "Kontrol infrastruktur penuh dengan komputasi mandiri" },
+            { id: "opt_self_host", label: "VPS Linux Self-Hosted (Nginx / PM2)", description: "Hosting hemat biaya pada server Linux privat" },
           ],
           required: false,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Deployment targets affect build configuration and environment variables.",
+          reason: "Target deployment mempengaruhi konfigurasi build dan variabel lingkungan produksi.",
         });
       }
     } else {
@@ -1028,21 +1148,21 @@ export class DiscoveryEngine {
       if (!existingCategories.has("testing") && this.project.questions.filter((q) => q.status === "answered").length >= 2) {
         followUps.push({
           id: this.generateQuestionId(),
-          title: "What are the primary acceptance criteria and QA testing requirements?",
-          description: "E.g., Automated unit tests, end-to-end user flows, cross-device testing.",
+          title: "Kriteria pengujian (QA) dan standar jaminan kualitas apa yang dibutuhkan?",
+          description: "Contoh: Unit test otomatis, end-to-end user flow testing, atau uji coba manual.",
           category: "testing",
           priority: "low",
           questionType: "single_choice",
           options: [
-            { id: "opt_full_ci_test", label: "Unit + E2E Tests with CI Pipeline", description: "High reliability before every release" },
-            { id: "opt_manual_qa", label: "Manual QA + Smoke Testing", description: "Fast MVP validation and rapid iteration" },
+            { id: "opt_full_ci_test", label: "Unit Test + E2E Terintegrasi CI/CD", description: "Keandalan tinggi sebelum setiap rilis kode ke produksi" },
+            { id: "opt_manual_qa", label: "Manual QA + Smoke Testing Cepat", description: "Validasi MVP cepat untuk iterasi pengembangan awal" },
           ],
           required: false,
           blocking: false,
           dependsOn: [],
           relatedNodeIds: [],
           status: "pending",
-          reason: "Defines quality gates in the Testing & QA section.",
+          reason: "Menentukan gerbang kualitas pada bab Testing & QA di dokumen PRD.",
         });
       }
     }
