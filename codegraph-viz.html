@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeGraph Visualizer</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a1a;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden;height:100vh;width:100vw}
+  #bg-canvas{position:fixed;top:0;left:0;z-index:0}
+  #main{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh}
+  #topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(10,10,26,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(100,100,255,0.15)}
+  #topbar h1{font-size:1.3rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#a78bfa,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stats{display:flex;gap:20px}
+  .stat{text-align:center}
+  .stat .val{font-size:1.6rem;font-weight:800;color:#a78bfa}
+  .stat .lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;color:#888}
+  #controls{display:flex;gap:8px;align-items:center}
+  .btn{padding:6px 14px;border:1px solid rgba(100,100,255,0.3);border-radius:6px;background:rgba(30,30,60,0.7);color:#c4b5fd;cursor:pointer;font-size:.75rem;transition:all .2s}
+  .btn:hover{background:rgba(99,102,241,0.3);border-color:#6366f1}
+  .btn.active{background:rgba(99,102,241,0.4);border-color:#a78bfa}
+  #graph-canvas{flex:1;cursor:grab}
+  #graph-canvas:active{cursor:grabbing}
+  #tooltip{position:fixed;display:none;padding:10px 14px;background:rgba(15,15,35,0.95);border:1px solid rgba(99,102,241,0.4);border-radius:8px;font-size:.8rem;max-width:320px;z-index:10;backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+  #tooltip .tt-name{color:#a78bfa;font-weight:700;font-size:.9rem}
+  #tooltip .tt-kind{color:#06b6d4;font-size:.7rem;text-transform:uppercase;letter-spacing:1px}
+  #tooltip .tt-file{color:#888;font-size:.7rem;margin-top:4px}
+  #tooltip .tt-sig{color:#c4b5fd;font-size:.75rem;margin-top:4px;font-family:'Cascadia Code',monospace}
+  #legend{position:fixed;bottom:16px;left:16px;padding:12px;background:rgba(10,10,26,0.85);border:1px solid rgba(100,100,255,0.15);border-radius:8px;font-size:.7rem;z-index:5;backdrop-filter:blur(8px)}
+  #legend div{display:flex;align-items:center;gap:6px;margin:3px 0}
+  #legend span.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+  #empty-state{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:5}
+  #empty-state h2{font-size:2rem;background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  #empty-state p{color:#888;margin:12px 0}
+  #info-panel{position:fixed;right:16px;top:80px;width:280px;background:rgba(10,10,26,0.9);border:1px solid rgba(100,100,255,0.15);border-radius:10px;padding:16px;z-index:5;backdrop-filter:blur(8px);display:none}
+  #info-panel h3{color:#a78bfa;font-size:.9rem;margin-bottom:8px}
+  .info-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(100,100,255,0.08);font-size:.75rem}
+  .info-row .ik{color:#888}.info-row .iv{color:#e0e0e0}
+  .bar-chart{margin-top:10px}
+  .bar-row{display:flex;align-items:center;gap:6px;margin:3px 0;font-size:.7rem}
+  .bar-row .bar-label{width:70px;text-align:right;color:#888}
+  .bar-row .bar-track{flex:1;height:6px;background:rgba(100,100,255,0.1);border-radius:3px;overflow:hidden}
+  .bar-row .bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div id="main">
+  <div id="topbar">
+    <h1>⬡ CodeGraph Visualizer</h1>
+    <div class="stats">
+      <div class="stat"><div class="val" id="s-files">0</div><div class="lbl">Files</div></div>
+      <div class="stat"><div class="val" id="s-nodes">0</div><div class="lbl">Nodes</div></div>
+      <div class="stat"><div class="val" id="s-edges">0</div><div class="lbl">Edges</div></div>
+      <div class="stat"><div class="val" id="s-langs">0</div><div class="lbl">Languages</div></div>
+    </div>
+    <div id="controls">
+      <button class="btn" onclick="togglePhysics()" id="btn-physics">⏸ Freeze</button>
+      <button class="btn" onclick="resetView()">⟲ Reset</button>
+      <button class="btn" onclick="togglePanel()">📊 Stats</button>
+      <button class="btn" onclick="loadData()">🔄 Reload</button>
+    </div>
+  </div>
+  <canvas id="graph-canvas"></canvas>
+</div>
+<div id="tooltip"><div class="tt-kind"></div><div class="tt-name"></div><div class="tt-file"></div><div class="tt-sig"></div></div>
+<div id="legend">
+  <div><span class="dot" style="background:#f472b6"></span> Class</div>
+  <div><span class="dot" style="background:#6366f1"></span> Function</div>
+  <div><span class="dot" style="background:#06b6d4"></span> Method</div>
+  <div><span class="dot" style="background:#facc15"></span> Interface</div>
+  <div><span class="dot" style="background:#4ade80"></span> Variable/Const</div>
+  <div><span class="dot" style="background:#fb923c"></span> Module/File</div>
+  <div><span class="dot" style="background:#a78bfa"></span> Other</div>
+</div>
+<div id="info-panel">
+  <h3>📊 Index Statistics</h3>
+  <div id="info-rows"></div>
+  <h3 style="margin-top:12px">Languages</h3>
+  <div id="lang-bars" class="bar-chart"></div>
+  <h3 style="margin-top:12px">Node Kinds</h3>
+  <div id="kind-bars" class="bar-chart"></div>
+</div>
+<div id="empty-state" style="display:none">
+  <h2>Index Empty</h2>
+  <p>Add source files and run <code style="color:#a78bfa">codegraph sync</code></p>
+  <p style="font-size:.8rem;color:#666">Background animation active — graph will appear when indexed</p>
+</div>
+
+<script>
+// ── Neural background ──
+const bgC = document.getElementById('bg-canvas');
+const bgCtx = bgC.getContext('2d');
+let bgW, bgH;
+const particles = [];
+const PARTICLE_COUNT = 80;
+
+function resizeBg(){bgW=bgC.width=innerWidth;bgH=bgC.height=innerHeight}
+window.addEventListener('resize',()=>{resizeBg();resizeGraph()});
+resizeBg();
+
+for(let i=0;i<PARTICLE_COUNT;i++){
+  particles.push({x:Math.random()*bgW,y:Math.random()*bgH,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2+1,hue:240+Math.random()*60});
+}
+
+function drawBg(){
+  bgCtx.fillStyle='rgba(10,10,26,0.15)';
+  bgCtx.fillRect(0,0,bgW,bgH);
+  for(let i=0;i<particles.length;i++){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=bgW;if(p.x>bgW)p.x=0;
+    if(p.y<0)p.y=bgH;if(p.y>bgH)p.y=0;
+    for(let j=i+1;j<particles.length;j++){
+      const q=particles[j];
+      const dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<150){
+        bgCtx.beginPath();bgCtx.moveTo(p.x,p.y);bgCtx.lineTo(q.x,q.y);
+        bgCtx.strokeStyle=`hsla(${p.hue},70%,60%,${(1-d/150)*0.15})`;
+        bgCtx.lineWidth=0.5;bgCtx.stroke();
+      }
+    }
+    bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    bgCtx.fillStyle=`hsla(${p.hue},70%,70%,0.6)`;bgCtx.fill();
+  }
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ── Graph engine ──
+const gC = document.getElementById('graph-canvas');
+const gCtx = gC.getContext('2d');
+let gW, gH;
+function resizeGraph(){gW=gC.width=innerWidth;gH=gC.height=innerHeight-document.getElementById('topbar').offsetHeight;gC.style.marginTop='0'}
+resizeGraph();
+
+const KIND_COLORS={class:'#f472b6',function:'#6366f1',method:'#06b6d4',interface:'#facc15',type_alias:'#facc15',variable:'#4ade80',constant:'#4ade80',module:'#fb923c',file:'#fb923c',enum:'#e879f9'};
+const EDGE_COLORS={calls:'#6366f180',imports:'#06b6d450',contains:'#ffffff20',extends:'#f472b650',implements:'#facc1550'};
+
+let nodes=[], edges=[], graphData={files:0,nodes:0,edges:0,langs:{},kinds:{}};
+let physics=true, camX=0, camY=0, zoom=1, dragNode=null, panStart=null;
+let hoveredNode=null;
+
+function kindColor(k){return KIND_COLORS[k]||'#a78bfa'}
+function edgeColor(k){return EDGE_COLORS[k]||'#ffffff15'}
+function nodeRadius(n){return Math.max(4, Math.min(18, 4 + (n.edgeCount||0)*0.8))}
+
+// Force simulation
+function simulate(){
+  if(!physics)return;
+  const N=nodes.length;
+  // Repulsion
+  for(let i=0;i<N;i++){
+    for(let j=i+1;j<N;j++){
+      let dx=nodes[j].x-nodes[i].x, dy=nodes[j].y-nodes[i].y;
+      let d=Math.sqrt(dx*dx+dy*dy)||1;
+      let f=200/(d*d);
+      nodes[i].vx-=dx/d*f; nodes[i].vy-=dy/d*f;
+      nodes[j].vx+=dx/d*f; nodes[j].vy+=dy/d*f;
+    }
+  }
+  // Attraction (edges)
+  for(const e of edges){
+    const s=e.srcNode, t=e.tgtNode;
+    if(!s||!t)continue;
+    let dx=t.x-s.x, dy=t.y-s.y, d=Math.sqrt(dx*dx+dy*dy)||1;
+    let f=(d-80)*0.005;
+    s.vx+=dx/d*f; s.vy+=dy/d*f;
+    t.vx-=dx/d*f; t.vy-=dy/d*f;
+  }
+  // Center gravity
+  for(const n of nodes){
+    n.vx-=n.x*0.001; n.vy-=n.y*0.001;
+    n.vx*=0.92; n.vy*=0.92;
+    if(n!==dragNode){n.x+=n.vx; n.y+=n.vy;}
+  }
+}
+
+function drawGraph(){
+  gCtx.clearRect(0,0,gW,gH);
+  gCtx.save();
+  gCtx.translate(gW/2+camX, gH/2+camY);
+  gCtx.scale(zoom,zoom);
+
+  // Edges
+  for(const e of edges){
+    const s=e.srcNode, t=e.tgtNode;
+    if(!s||!t)continue;
+    gCtx.beginPath();gCtx.moveTo(s.x,s.y);gCtx.lineTo(t.x,t.y);
+    gCtx.strokeStyle=edgeColor(e.kind);
+    gCtx.lineWidth=e===hoveredEdge?2:0.8;
+    gCtx.stroke();
+  }
+
+  // Nodes
+  const t=Date.now()/1000;
+  for(const n of nodes){
+    const r=nodeRadius(n);
+    const col=kindColor(n.kind);
+    // Glow
+    const glow=gCtx.createRadialGradient(n.x,n.y,r*0.5,n.x,n.y,r*3);
+    glow.addColorStop(0,col+'40');glow.addColorStop(1,'transparent');
+    gCtx.fillStyle=glow;gCtx.fillRect(n.x-r*3,n.y-r*3,r*6,r*6);
+    // Circle
+    gCtx.beginPath();gCtx.arc(n.x,n.y,r+Math.sin(t*2+n.phase)*0.5,0,Math.PI*2);
+    gCtx.fillStyle=n===hoveredNode?'#fff':col;
+    gCtx.fill();
+    gCtx.strokeStyle=col;gCtx.lineWidth=n===hoveredNode?2:0.5;gCtx.stroke();
+    // Label
+    if(zoom>0.6||n===hoveredNode){
+      gCtx.fillStyle=n===hoveredNode?'#fff':'#ccc';
+      gCtx.font=`${n===hoveredNode?'bold ':''}${Math.max(9,11/zoom)}px 'Segoe UI',sans-serif`;
+      gCtx.textAlign='center';
+      gCtx.fillText(n.name, n.x, n.y+r+12/zoom);
+    }
+  }
+  gCtx.restore();
+
+  simulate();
+  requestAnimationFrame(drawGraph);
+}
+let hoveredEdge=null;
+drawGraph();
+
+// ── Interaction ──
+function screenToWorld(sx,sy){return{x:(sx-gW/2-camX)/zoom, y:(sy-gH/2-camY)/zoom}}
+function worldToScreen(wx,wy){return{x:wx*zoom+gW/2+camX, y:wy*zoom+gH/2+camY}}
+
+gC.addEventListener('mousedown',e=>{
+  const p=screenToWorld(e.offsetX,e.offsetY);
+  for(const n of nodes){
+    if(Math.hypot(n.x-p.x,n.y-p.y)<nodeRadius(n)+4){dragNode=n;n.vx=0;n.vy=0;return}
+  }
+  panStart={x:e.clientX-camX,y:e.clientY-camY};
+});
+gC.addEventListener('mousemove',e=>{
+  const p=screenToWorld(e.offsetX,e.offsetY);
+  if(dragNode){dragNode.x=p.x;dragNode.y=p.y;return}
+  if(panStart){camX=e.clientX-panStart.x;camY=e.clientY-panStart.y;return}
+  // Hover
+  hoveredNode=null;
+  const tt=document.getElementById('tooltip');
+  for(const n of nodes){
+    if(Math.hypot(n.x-p.x,n.y-p.y)<nodeRadius(n)+4){
+      hoveredNode=n;
+      tt.style.display='block';
+      tt.style.left=(e.clientX+16)+'px';tt.style.top=(e.clientY+16)+'px';
+      tt.querySelector('.tt-name').textContent=n.name;
+      tt.querySelector('.tt-kind').textContent=n.kind;
+      tt.querySelector('.tt-file').textContent=n.file||'';
+      tt.querySelector('.tt-sig').textContent=n.signature||'';
+      return;
+    }
+  }
+  tt.style.display='none';
+});
+gC.addEventListener('mouseup',()=>{dragNode=null;panStart=null});
+gC.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const z=zoom;
+  zoom*=e.deltaY>0?0.9:1.1;
+  zoom=Math.max(0.1,Math.min(5,zoom));
+  // Zoom toward cursor
+  const r=zoom/z;
+  camX=e.offsetX-(e.offsetX-camX)*r;
+  camY=e.offsetY-(e.offsetY-camY)*r;
+},{passive:false});
+
+function togglePhysics(){
+  physics=!physics;
+  document.getElementById('btn-physics').textContent=physics?'⏸ Freeze':'▶ Resume';
+  document.getElementById('btn-physics').classList.toggle('active',!physics);
+}
+function resetView(){camX=0;camY=0;zoom=1}
+function togglePanel(){
+  const p=document.getElementById('info-panel');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+// ── Data loading ──
+async function loadData(){
+  let data;
+  try{
+    const r=await fetch('codegraph-data.json');
+    if(r.ok) data=await r.json();
+  }catch(e){}
+
+  if(!data){
+    // Try API endpoint (if server running)
+    try{
+      const r=await fetch('http://localhost:9742/api/graph');
+      if(r.ok) data=await r.json();
+    }catch(e){}
+  }
+
+  if(!data||!data.nodes||data.nodes.length===0){
+    document.getElementById('empty-state').style.display='block';
+    document.getElementById('s-files').textContent='0';
+    document.getElementById('s-nodes').textContent='0';
+    document.getElementById('s-edges').textContent='0';
+    document.getElementById('s-langs').textContent='0';
+    return;
+  }
+
+  document.getElementById('empty-state').style.display='none';
+  buildGraph(data);
+}
+
+function buildGraph(data){
+  nodes=[]; edges=[];
+  const nodeMap={};
+  const edgeCounts={};
+
+  for(const n of data.nodes){
+    edgeCounts[n.id]=0;
+  }
+  for(const e of data.edges){
+    edgeCounts[e.source]=(edgeCounts[e.source]||0)+1;
+    edgeCounts[e.target]=(edgeCounts[e.target]||0)+1;
+  }
+
+  const angle=2*Math.PI/Math.max(1,data.nodes.length);
+  data.nodes.forEach((n,i)=>{
+    const r=100+Math.random()*200;
+    const nd={
+      id:n.id, name:n.name, kind:n.kind, file:n.file_path,
+      signature:n.signature||'', language:n.language,
+      x:Math.cos(angle*i)*r, y:Math.sin(angle*i)*r,
+      vx:0,vy:0, phase:Math.random()*Math.PI*2,
+      edgeCount:edgeCounts[n.id]||0
+    };
+    nodes.push(nd);
+    nodeMap[n.id]=nd;
+  });
+
+  for(const e of data.edges){
+    edges.push({srcNode:nodeMap[e.source],tgtNode:nodeMap[e.target],kind:e.kind});
+  }
+
+  // Stats
+  const langs={}, kinds={};
+  for(const n of data.nodes){
+    langs[n.language]=(langs[n.language]||0)+1;
+    kinds[n.kind]=(kinds[n.kind]||0)+1;
+  }
+  const fileSet=new Set(data.nodes.map(n=>n.file_path));
+
+  document.getElementById('s-files').textContent=data.files_count||fileSet.size;
+  document.getElementById('s-nodes').textContent=data.nodes.length;
+  document.getElementById('s-edges').textContent=data.edges.length;
+  document.getElementById('s-langs').textContent=Object.keys(langs).length;
+
+  // Animate stats counter
+  animateCounter('s-files', data.files_count||fileSet.size);
+  animateCounter('s-nodes', data.nodes.length);
+  animateCounter('s-edges', data.edges.length);
+  animateCounter('s-langs', Object.keys(langs).length);
+
+  // Info panel
+  const rows=document.getElementById('info-rows');
+  rows.innerHTML=`
+    <div class="info-row"><span class="ik">DB Size</span><span class="iv">${data.db_size||'?'}</span></div>
+    <div class="info-row"><span class="ik">Files</span><span class="iv">${data.files_count||fileSet.size}</span></div>
+    <div class="info-row"><span class="ik">Total Nodes</span><span class="iv">${data.nodes.length}</span></div>
+    <div class="info-row"><span class="ik">Total Edges</span><span class="iv">${data.edges.length}</span></div>
+  `;
+
+  fillBars('lang-bars', langs, ['#6366f1','#06b6d4','#4ade80','#f472b6','#facc15','#fb923c']);
+  fillBars('kind-bars', kinds, ['#f472b6','#6366f1','#06b6d4','#facc15','#4ade80','#fb923c','#a78bfa']);
+}
+
+function fillBars(id, map, colors){
+  const el=document.getElementById(id);
+  const sorted=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const max=sorted[0]?sorted[0][1]:1;
+  el.innerHTML=sorted.map(([k,v],i)=>`
+    <div class="bar-row">
+      <span class="bar-label">${k}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${v/max*100}%;background:${colors[i%colors.length]}"></span></span>
+      <span style="color:#aaa;width:30px">${v}</span>
+    </div>`).join('');
+}
+
+function animateCounter(id,target){
+  const el=document.getElementById(id);
+  let cur=0;const step=Math.max(1,Math.ceil(target/30));
+  const iv=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur;if(cur>=target)clearInterval(iv)},30);
+}
+
+loadData();
+</script>
+</body>
+</html>
